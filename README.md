@@ -1,1 +1,1 @@
-# vault-plugin-secrets-mongodbatlas
+# vault-plugin-secrets-mongodb-atlas
