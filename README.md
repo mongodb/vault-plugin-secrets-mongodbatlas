@@ -1,1 +1,1 @@
-# vault-plugin-secrets-mongodb-atlas
+# README
