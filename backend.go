@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/mongodb-partners/go-client-mongodb-atlas/mongodbatlas"
@@ -35,7 +36,10 @@ func NewBackend() *Backend {
 			},
 		},
 
-		Paths: []*framework.Path{},
+		Paths: []*framework.Path{
+			pathListCredentials(&b),
+			pathCredentials(&b),
+		},
 
 		Secrets: []*framework.Secret{},
 
@@ -51,9 +55,19 @@ type Backend struct {
 	*framework.Backend
 
 	// Mutex to protect access to client and client config
-	clientMutex sync.RWMutex
+	clientMutex     sync.RWMutex
+	credentialMutex sync.RWMutex
 
 	mongodbatlas.Client
+
+	logger hclog.Logger
+	system logical.SystemView
+}
+
+func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) error {
+	b.logger = config.Logger
+	b.system = config.System
+	return nil
 }
 
 const backendHelp = ``
