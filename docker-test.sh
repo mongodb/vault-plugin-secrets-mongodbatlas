@@ -2,7 +2,8 @@
 
 set -ex
 
-GOOS=linux go build
+GOOS=linux go build cmd/atlas/main.go 
+mv main vault-plugin-secrets-mongodbatlas
 
 docker kill vaultplg 2>/dev/null || true
 tmpdir=$(mktemp -d vaultplgXXXXXX)
@@ -26,12 +27,12 @@ vault operator unseal $(echo "$initoutput" | jq -r .unseal_keys_hex[0])
 
 export VAULT_TOKEN=$(echo "$initoutput" | jq -r .root_token)
 
-vault write sys/plugins/catalog/auth/vault-plugin-secrets-mongodb-atlas \
-    sha_256=$(shasum -a 256 vault-auth-plugin-example | cut -d' ' -f1) \
-    command="vault-plugin-secrets-mongodb-atlas"
+vault write sys/plugins/catalog/secret/vault-plugin-secrets-mongodbatlas \
+    sha_256=$(shasum -a 256 vault-plugin-secrets-mongodbatlas | cut -d' ' -f1) \
+    command="vault-plugin-secrets-mongodbatlas"
 
-vault auth enable \
-    -path="example" \
-    -plugin-name="vault-plugin-secrets-mongodb-atlas" plugin
+vault secrets enable \
+    -path="atlas" \
+    -plugin-name="vault-plugin-secrets-mongodbatlas" plugin
 
-VAULT_TOKEN=  vault write auth/example/login password="super-secret-password"
+VAULT_TOKEN=  vault write atlas/credentials/test password="super-secret-password"
