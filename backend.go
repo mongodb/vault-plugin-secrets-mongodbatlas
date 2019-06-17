@@ -39,6 +39,7 @@ func NewBackend() *Backend {
 		Paths: []*framework.Path{
 			pathListCredentials(&b),
 			pathCredentials(&b),
+			pathConfigRoot(&b),
 		},
 
 		Secrets: []*framework.Secret{},
@@ -58,7 +59,7 @@ type Backend struct {
 	clientMutex     sync.RWMutex
 	credentialMutex sync.RWMutex
 
-	mongodbatlas.Client
+	client *mongodbatlas.Client
 
 	logger hclog.Logger
 	system logical.SystemView
