@@ -35,7 +35,9 @@ func NewBackend() *Backend {
 			},
 		},
 
-		Paths: []*framework.Path{},
+		Paths: []*framework.Path{
+			pathConfigRoot(&b),
+		},
 
 		Secrets: []*framework.Secret{},
 
@@ -53,7 +55,7 @@ type Backend struct {
 	// Mutex to protect access to client and client config
 	clientMutex sync.RWMutex
 
-	mongodbatlas.Client
+	client *mongodbatlas.Client
 }
 
 const backendHelp = ``
