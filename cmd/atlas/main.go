@@ -1,7 +1,9 @@
-package atlas
+package main
 
 import (
 	"os"
+
+	atlas "github.com/mongodb-partners/vault-plugin-secrets-mongodb-atlas"
 
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
@@ -17,7 +19,7 @@ func main() {
 	tlsProviderFunc := api.VaultPluginTLSProvider(tlsConfig)
 
 	if err := plugin.Serve(&plugin.ServeOpts{
-		BackendFactoryFunc: Factory,
+		BackendFactoryFunc: atlas.Factory,
 		TLSProviderFunc:    tlsProviderFunc,
 	}); err != nil {
 		logger := hclog.New(&hclog.LoggerOptions{})
