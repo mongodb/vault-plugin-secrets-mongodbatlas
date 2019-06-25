@@ -52,8 +52,8 @@ func (b *Backend) pathConfigRootWrite(ctx context.Context, req *logical.Request,
 }
 
 type rootConfig struct {
-	PrivateKey string
-	PublicKey  string
+	PrivateKey string `json:"private_key"`
+	PublicKey  string `json":public_key"`
 }
 
 const pathConfigRootHelpSyn = `
