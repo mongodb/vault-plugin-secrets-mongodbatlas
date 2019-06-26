@@ -13,7 +13,7 @@ import (
 
 func pathListCredentials(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "credentials/?$",
+		Pattern: "roles/?$",
 
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.ListOperation: b.pathCredentialList,
@@ -27,7 +27,7 @@ func pathListCredentials(b *Backend) *framework.Path {
 func (b *Backend) pathCredentialList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	b.credentialMutex.RLock()
 	defer b.credentialMutex.RUnlock()
-	entries, err := req.Storage.List(ctx, "credentials/")
+	entries, err := req.Storage.List(ctx, "roles/")
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (b *Backend) pathCredentialList(ctx context.Context, req *logical.Request, 
 
 func pathCredentials(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "credentials/" + framework.GenericNameRegex("name"),
+		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,
