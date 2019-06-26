@@ -40,7 +40,16 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
 	}
 
-	return b.databaseUserCreate(ctx, req.Storage, userName, cred)
+	// Get lease configuration(if any)
+	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+	if leaseConfig == nil {
+		leaseConfig = &configLease{}
+	}
+
+	return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
 }
 
 type walDatabaseUser struct {
