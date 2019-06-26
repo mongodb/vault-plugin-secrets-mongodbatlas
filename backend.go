@@ -40,9 +40,12 @@ func NewBackend() *Backend {
 			pathListCredentials(&b),
 			pathCredentials(&b),
 			pathConfigRoot(&b),
+			pathDatabaseUser(&b),
 		},
 
-		Secrets: []*framework.Secret{},
+		Secrets: []*framework.Secret{
+			databaseUsers(&b),
+		},
 
 		WALRollbackMinAge: minUserRollbackAge,
 		BackendType:       logical.TypeLogical,
@@ -65,6 +68,7 @@ type Backend struct {
 	system logical.SystemView
 }
 
+// Setup ...
 func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) error {
 	b.logger = config.Logger
 	b.system = config.System
