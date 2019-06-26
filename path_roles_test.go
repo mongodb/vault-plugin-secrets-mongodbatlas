@@ -30,7 +30,7 @@ func TestBackend_PathListCredentials(t *testing.T) {
 	}
 
 	for i := 1; i <= 10; i++ {
-		credReq.Path = "credentials/testcred" + strconv.Itoa(i)
+		credReq.Path = "roles/testcred" + strconv.Itoa(i)
 		resp, err = b.HandleRequest(context.Background(), credReq)
 		if err != nil || (resp != nil && resp.IsError()) {
 			t.Fatalf("bad: credential creation failed:. resp:%#v err:%v", resp, err)
@@ -40,7 +40,7 @@ func TestBackend_PathListCredentials(t *testing.T) {
 
 	resp, err = b.HandleRequest(context.Background(), &logical.Request{
 		Operation: logical.ListOperation,
-		Path:      "credentials/",
+		Path:      "roles/",
 		Storage:   config.StorageView,
 	})
 	if err != nil || (resp != nil && resp.IsError()) {
@@ -53,7 +53,7 @@ func TestBackend_PathListCredentials(t *testing.T) {
 
 	resp, err = b.HandleRequest(context.Background(), &logical.Request{
 		Operation: logical.ListOperation,
-		Path:      "credential/",
+		Path:      "roles/",
 		Storage:   config.StorageView,
 	})
 	if err != nil || (resp != nil && resp.IsError()) {
