@@ -71,7 +71,7 @@ func TestDatabaseUser(t *testing.T) {
 		Data:      credData,
 	}
 
-	credReq.Path = "credentials/testcred"
+	credReq.Path = "roles/testcred"
 	resp, err = b.HandleRequest(context.Background(), credReq)
 	if err != nil || (resp != nil && resp.IsError()) {
 		t.Fatalf("bad: credential creation failed: resp:%#v err:%v", resp, err)
