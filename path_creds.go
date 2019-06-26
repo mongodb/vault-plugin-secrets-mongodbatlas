@@ -14,7 +14,7 @@ import (
 
 func pathDatabaseUser(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "database_users/" + framework.GenericNameRegex("name"),
+		Pattern: "(creds|keys)/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,

@@ -81,7 +81,7 @@ func TestDatabaseUser(t *testing.T) {
 		Operation: logical.ReadOperation,
 		Storage:   config.StorageView,
 	}
-	userReq.Path = "database_users/testcred"
+	userReq.Path = "creds/testcred"
 	resp, err = b.HandleRequest(context.Background(), userReq)
 	if err != nil || (resp != nil && resp.IsError()) {
 		t.Fatalf("bad: read database_user failed: resp:%#v err:%v", resp, err)
