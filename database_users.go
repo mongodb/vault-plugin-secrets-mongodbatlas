@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/mitchellh/mapstructure"
 	"github.com/mongodb-partners/go-client-mongodb-atlas/mongodbatlas"
+	"github.com/sethvargo/go-password/password"
 )
 
 func databaseUsers(b *Backend) *framework.Secret {
@@ -143,7 +144,10 @@ func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, dis
 	if err != nil {
 		return nil, errwrap.Wrapf("error reading credential roles {{err}}", err)
 	}
-	passwd := getRandomPassword(22)
+	passwd, err := password.Generate(22, 3, 0, false, false)
+	if err != nil {
+		return nil, err
+	}
 
 	_, _, err = client.DatabaseUsers.Create(context.Background(), cred.ProjectID, &mongodbatlas.DatabaseUser{
 		Username:     username,
