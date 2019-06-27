@@ -36,14 +36,26 @@ func databaseUsers(b *Backend) *framework.Secret {
 }
 
 func (b *Backend) databaseUserRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	return nil, nil
+	// Get the lease (if any)
+	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+	if leaseConfig == nil {
+		leaseConfig = &configLease{}
+	}
+
+	resp := &logical.Response{Secret: req.Secret}
+	resp.Secret.TTL = leaseConfig.TTL
+	resp.Secret.MaxTTL = leaseConfig.MaxTTL
+	return resp, nil
 }
 
 func (b *Backend) databaseUserRevoke(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	return nil, nil
 }
 
-func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry) (*logical.Response, error) {
+func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry, lease *configLease) (*logical.Response, error) {
 
 	username := genUsername(displayName)
 	client, err := b.clientMongo(ctx, s)
@@ -94,6 +106,9 @@ func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, dis
 		"username": username,
 		"password": passwd,
 	})
+
+	resp.Secret.TTL = lease.TTL
+	resp.Secret.MaxTTL = lease.MaxTTL
 
 	return resp, nil
 }

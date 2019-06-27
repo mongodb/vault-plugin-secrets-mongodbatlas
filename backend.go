@@ -41,6 +41,7 @@ func NewBackend() *Backend {
 			pathCredentials(&b),
 			pathConfigRoot(&b),
 			pathDatabaseUser(&b),
+			pathConfigLease(&b),
 		},
 
 		Secrets: []*framework.Secret{
