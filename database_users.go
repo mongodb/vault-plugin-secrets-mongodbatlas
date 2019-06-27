@@ -110,8 +110,8 @@ func (b *Backend) databaseUserRevoke(ctx context.Context, req *logical.Request, 
 	if !ok {
 		return nil, fmt.Errorf("secret is missing projectid internal data")
 	}
-	// Use the user rollback mechanism to delete this user
-	err := b.pathDatabaseUserRollback(ctx, req, "user", map[string]interface{}{
+	// Use the user rollback mechanism to delete this database_user
+	err := b.pathDatabaseUserRollback(ctx, req, "database_user", map[string]interface{}{
 		"username":  username,
 		"projectid": projectID,
 	})
