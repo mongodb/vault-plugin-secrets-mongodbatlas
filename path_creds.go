@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/errwrap"
@@ -49,7 +50,21 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 		leaseConfig = &configLease{}
 	}
 
-	return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
+	if strings.HasPrefix(req.Path, "creds") && cred.CredentialType == programmaticAPIKey {
+		return logical.ErrorResponse("attempted to retrieve %s credentials throug the keys path", cred.CredentialType), nil
+	}
+	if strings.HasPrefix(req.Path, "keys") && cred.CredentialType == databaseUser {
+		return logical.ErrorResponse("attempted to retrieve %s credentials throug the keys path", cred.CredentialType), nil
+	}
+
+	switch cred.CredentialType {
+	case databaseUser:
+		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
+	case programmaticAPIKey:
+		return nil, nil
+	}
+
+	return nil, nil
 }
 
 type walDatabaseUser struct {
