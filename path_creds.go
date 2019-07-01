@@ -68,7 +68,8 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 }
 
 type walDatabaseUser struct {
-	UserName string
+	UserName  string
+	ProjectID string
 }
 
 func genUsername(displayName string) (ret string) {

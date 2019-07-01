@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
+	"github.com/mitchellh/mapstructure"
 	"github.com/mongodb-partners/go-client-mongodb-atlas/mongodbatlas"
+	"github.com/sethvargo/go-password/password"
 )
 
 func databaseUsers(b *Backend) *framework.Secret {
@@ -51,7 +54,72 @@ func (b *Backend) databaseUserRenew(ctx context.Context, req *logical.Request, d
 	return resp, nil
 }
 
+func (b *Backend) pathDatabaseUserRollback(ctx context.Context, req *logical.Request, _kind string, data interface{}) error {
+
+	var entry walDatabaseUser
+	if err := mapstructure.Decode(data, &entry); err != nil {
+		return err
+	}
+	username := entry.UserName
+	projectID := entry.ProjectID
+
+	// Get the client
+	client, err := b.clientMongo(ctx, req.Storage)
+	if err != nil {
+		return nil
+	}
+
+	// check if the user exists or not
+	_, res, err := client.DatabaseUsers.Get(context.Background(), projectID, username)
+	// if the user is gone, move along
+	if err != nil {
+		if res != nil && res.StatusCode == http.StatusNotFound {
+			return nil
+		}
+		return err
+	}
+
+	// now, delete the user
+	res, err = client.DatabaseUsers.Delete(context.Background(), projectID, username)
+	if err != nil {
+		if res != nil && res.StatusCode == http.StatusNotFound {
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
+
 func (b *Backend) databaseUserRevoke(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+	// Get the username from the internal data
+	usernameRaw, ok := req.Secret.InternalData["username"]
+	if !ok {
+		return nil, fmt.Errorf("secret is missing username internal data")
+	}
+
+	username, ok := usernameRaw.(string)
+	if !ok {
+		return nil, fmt.Errorf("secret is missing username internal data")
+	}
+	projectIDRaw, ok := req.Secret.InternalData["projectid"]
+	if !ok {
+		return nil, fmt.Errorf("secret is missing projectid internal data")
+	}
+
+	projectID, ok := projectIDRaw.(string)
+	if !ok {
+		return nil, fmt.Errorf("secret is missing projectid internal data")
+	}
+	// Use the user rollback mechanism to delete this database_user
+	err := b.pathDatabaseUserRollback(ctx, req, "database_user", map[string]interface{}{
+		"username":  username,
+		"projectid": projectID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
@@ -76,7 +144,10 @@ func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, dis
 	if err != nil {
 		return nil, errwrap.Wrapf("error reading credential roles {{err}}", err)
 	}
-	passwd := getRandomPassword(22)
+	passwd, err := password.Generate(22, 3, 0, false, false)
+	if err != nil {
+		return nil, err
+	}
 
 	_, _, err = client.DatabaseUsers.Create(context.Background(), cred.ProjectID, &mongodbatlas.DatabaseUser{
 		Username:     username,
@@ -103,8 +174,9 @@ func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, dis
 		"username": username,
 		"password": passwd,
 	}, map[string]interface{}{
-		"username": username,
-		"password": passwd,
+		"username":  username,
+		"password":  passwd,
+		"projectid": cred.ProjectID,
 	})
 
 	resp.Secret.TTL = lease.TTL
