@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	envVarRunAccTests = "VAULT_ACC"
-	envVarPrivateKey  = "ATLAS_PRIVATE_KEY"
-	envVarPublicKey   = "ATLAS_PUBLIC_KEY"
-	envVarProjectID   = "ATLAS_PROJECT_ID"
+	envVarRunAccTests    = "VAULT_ACC"
+	envVarPrivateKey     = "ATLAS_PRIVATE_KEY"
+	envVarPublicKey      = "ATLAS_PUBLIC_KEY"
+	envVarProjectID      = "ATLAS_PROJECT_ID"
+	envVarOrganizationID = "ATLAS_ORGANIZATION_ID"
 )
 
 var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
@@ -37,6 +38,20 @@ func TestAcceptanceDatabaseUser(t *testing.T) {
 	t.Run("revoke database user creds", acceptanceTestEnv.RevokeDatabaseUsersCreds)
 }
 
+func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
+
+	acceptanceTestEnv, err := newAcceptanceTestEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("add config", acceptanceTestEnv.AddConfig)
+	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRole)
+}
+
 func newAcceptanceTestEnv() (*testEnv, error) {
 	ctx := context.Background()
 	conf := &logical.BackendConfig{
@@ -51,11 +66,12 @@ func newAcceptanceTestEnv() (*testEnv, error) {
 		return nil, err
 	}
 	return &testEnv{
-		PublicKey:  os.Getenv(envVarPublicKey),
-		PrivateKey: os.Getenv(envVarPrivateKey),
-		ProjectID:  os.Getenv(envVarProjectID),
-		Backend:    b,
-		Context:    ctx,
-		Storage:    &logical.InmemStorage{},
+		PublicKey:      os.Getenv(envVarPublicKey),
+		PrivateKey:     os.Getenv(envVarPrivateKey),
+		ProjectID:      os.Getenv(envVarProjectID),
+		OrganizationID: os.Getenv(envVarOrganizationID),
+		Backend:        b,
+		Context:        ctx,
+		Storage:        &logical.InmemStorage{},
 	}, nil
 }

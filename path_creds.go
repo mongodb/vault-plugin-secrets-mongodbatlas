@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/errwrap"
@@ -15,7 +14,7 @@ import (
 
 func pathDatabaseUser(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "(creds|keys)/" + framework.GenericNameRegex("name"),
+		Pattern: "creds/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,
@@ -48,13 +47,6 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 	}
 	if leaseConfig == nil {
 		leaseConfig = &configLease{}
-	}
-
-	if strings.HasPrefix(req.Path, "creds") && cred.CredentialType == programmaticAPIKey {
-		return logical.ErrorResponse("attempted to retrieve %s credentials throug the keys path", cred.CredentialType), nil
-	}
-	if strings.HasPrefix(req.Path, "keys") && cred.CredentialType == databaseUser {
-		return logical.ErrorResponse("attempted to retrieve %s credentials throug the keys path", cred.CredentialType), nil
 	}
 
 	switch cred.CredentialType {

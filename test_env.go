@@ -8,9 +8,10 @@ import (
 )
 
 type testEnv struct {
-	PublicKey  string
-	PrivateKey string
-	ProjectID  string
+	PublicKey      string
+	PrivateKey     string
+	ProjectID      string
+	OrganizationID string
 
 	Backend logical.Backend
 	Context context.Context
@@ -119,5 +120,23 @@ func (e *testEnv) RevokeDatabaseUsersCreds(t *testing.T) {
 	}
 	if resp != nil {
 		t.Fatal("expected nil response to represent a 204")
+	}
+}
+
+func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
+	roles := []string{}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-credential",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"credential_type":        "programmatic_api_key",
+			"organization_id":        e.OrganizationID,
+			"programmatic_key_roles": roles,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
 	}
 }
