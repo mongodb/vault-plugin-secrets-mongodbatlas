@@ -163,13 +163,13 @@ func (b *Backend) pathCredentialsWrite(ctx context.Context, req *logical.Request
 			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
 				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
 			} else {
-				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", databaseUser))
+				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", programmaticAPIKey))
 			}
-			if projectIDRaw, ok := d.GetOk("organization_id"); ok {
-				projectID := projectIDRaw.(string)
-				credentialEntry.ProjectID = projectID
+			if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
+				organizatioID := organizatioIDRaw.(string)
+				credentialEntry.OrganizationID = organizatioID
 			} else {
-				resp.AddWarning(fmt.Sprintf("organization_id required for %s", databaseUser))
+				resp.AddWarning(fmt.Sprintf("organization_id required for %s", programmaticAPIKey))
 			}
 		default:
 			return logical.ErrorResponse("Unsupported credential_type %s", credentialType), nil
