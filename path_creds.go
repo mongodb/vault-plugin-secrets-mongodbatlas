@@ -53,15 +53,17 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 	case databaseUser:
 		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
 	case programmaticAPIKey:
-		return nil, nil
+		return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
 	}
 
 	return nil, nil
 }
 
 type walDatabaseUser struct {
-	UserName  string
-	ProjectID string
+	UserName             string
+	ProjectID            string
+	OrganizationID       string
+	ProgrammaticAPIKeyID string
 }
 
 func genUsername(displayName string) (ret string) {
