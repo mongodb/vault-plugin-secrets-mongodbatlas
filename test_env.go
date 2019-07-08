@@ -164,7 +164,7 @@ func (e *testEnv) ReadProgrammaticAPIKeyRule(t *testing.T) {
 	e.MostRecentSecret = resp.Secret
 }
 
-func (e *testEnv) RenewProgrammaticApiKeys(t *testing.T) {
+func (e *testEnv) RenewProgrammaticAPIKeys(t *testing.T) {
 	req := &logical.Request{
 		Operation: logical.RenewOperation,
 		Storage:   e.Storage,
@@ -185,7 +185,7 @@ func (e *testEnv) RenewProgrammaticApiKeys(t *testing.T) {
 	}
 }
 
-func (e *testEnv) RevokeProgrammaticApiKeys(t *testing.T) {
+func (e *testEnv) RevokeProgrammaticAPIKeys(t *testing.T) {
 	req := &logical.Request{
 		Operation: logical.RevokeOperation,
 		Storage:   e.Storage,

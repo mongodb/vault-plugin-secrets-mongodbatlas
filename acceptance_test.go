@@ -51,8 +51,8 @@ func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRole)
 	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticApiKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticApiKeys)
+	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
