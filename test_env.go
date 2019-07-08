@@ -124,10 +124,10 @@ func (e *testEnv) RevokeDatabaseUsersCreds(t *testing.T) {
 }
 
 func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
-	roles := []string{}
+	roles := []string{"ORG_MEMBER"}
 	req := &logical.Request{
 		Operation: logical.UpdateOperation,
-		Path:      "roles/test-credential",
+		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
 			"credential_type":        "programmatic_api_key",
@@ -138,5 +138,67 @@ func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
 	resp, err := e.Backend.HandleRequest(e.Context, req)
 	if err != nil || (resp != nil && resp.IsError()) {
 		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
+func (e *testEnv) ReadProgrammaticAPIKeyRule(t *testing.T) {
+	req := &logical.Request{
+		Operation: logical.ReadOperation,
+		Path:      "creds/test-programmatic-key",
+		Storage:   e.Storage,
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+	if resp == nil {
+		t.Fatal("expected a response")
+	}
+
+	if resp.Data["public_key"] == "" {
+		t.Fatal("failed to receive access_key")
+	}
+	if resp.Data["private_key"] == "" {
+		t.Fatal("failed to receive secret_key")
+	}
+	e.MostRecentSecret = resp.Secret
+}
+
+func (e *testEnv) RenewProgrammaticApiKeys(t *testing.T) {
+	req := &logical.Request{
+		Operation: logical.RenewOperation,
+		Storage:   e.Storage,
+		Secret:    e.MostRecentSecret,
+		Data: map[string]interface{}{
+			"lease_id": "foo",
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+	if resp == nil {
+		t.Fatal("expected a response")
+	}
+	if resp.Secret != e.MostRecentSecret {
+		t.Fatalf("expected %+v but got %+v", e.MostRecentSecret, resp.Secret)
+	}
+}
+
+func (e *testEnv) RevokeProgrammaticApiKeys(t *testing.T) {
+	req := &logical.Request{
+		Operation: logical.RevokeOperation,
+		Storage:   e.Storage,
+		Secret:    e.MostRecentSecret,
+		Data: map[string]interface{}{
+			"lease_id": "foo",
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+	if resp != nil {
+		t.Fatal("expected nil response to represent a 204")
 	}
 }
