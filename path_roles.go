@@ -65,6 +65,14 @@ func pathCredentials(b *Backend) *framework.Path {
 				Type:        framework.TypeString,
 				Description: fmt.Sprintf("Roles for the credential, required for %s", databaseUser),
 			},
+			"programmatic_key_roles": &framework.FieldSchema{
+				Type:        framework.TypeCommaStringSlice,
+				Description: fmt.Sprintf("Roles for a programmatic API key, required for %s", programmaticAPIKey),
+			},
+			"organization_id": &framework.FieldSchema{
+				Type:        framework.TypeString,
+				Description: fmt.Sprintf("Organization ID for the credential, required for %s", programmaticAPIKey),
+			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.DeleteOperation: b.pathCredentialsDelete,
@@ -78,7 +86,7 @@ func pathCredentials(b *Backend) *framework.Path {
 }
 
 func (b *Backend) pathCredentialsDelete(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	err := req.Storage.Delete(ctx, "credential/"+d.Get("name").(string))
+	err := req.Storage.Delete(ctx, "roles/"+d.Get("name").(string))
 	return nil, err
 }
 
@@ -125,7 +133,8 @@ func (b *Backend) pathCredentialsWrite(ctx context.Context, req *logical.Request
 		}
 		credentialEntry.CredentialType = credentialType
 
-		if credentialType == databaseUser {
+		switch credentialType {
+		case databaseUser:
 			if projectIDRaw, ok := d.GetOk("project_id"); ok {
 				projectID := projectIDRaw.(string)
 				credentialEntry.ProjectID = projectID
@@ -150,7 +159,20 @@ func (b *Backend) pathCredentialsWrite(ctx context.Context, req *logical.Request
 				}
 				credentialEntry.Roles = compacted
 			}
-
+		case programmaticAPIKey:
+			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
+				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
+			} else {
+				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", programmaticAPIKey))
+			}
+			if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
+				organizatioID := organizatioIDRaw.(string)
+				credentialEntry.OrganizationID = organizatioID
+			} else {
+				resp.AddWarning(fmt.Sprintf("organization_id required for %s", programmaticAPIKey))
+			}
+		default:
+			return logical.ErrorResponse("Unsupported credential_type %s", credentialType), nil
 		}
 	}
 
@@ -169,7 +191,7 @@ func setAtlasCredential(ctx context.Context, s logical.Storage, credentialName s
 	if credentialEntry == nil {
 		return fmt.Errorf("emtpy credentialEntry")
 	}
-	entry, err := logical.StorageEntryJSON("credential/"+credentialName, credentialEntry)
+	entry, err := logical.StorageEntryJSON("roles/"+credentialName, credentialEntry)
 	if err != nil {
 		return err
 	}
@@ -190,7 +212,7 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 	if shouldLock {
 		b.credentialMutex.RLock()
 	}
-	entry, err := s.Get(ctx, "credential/"+credentialName)
+	entry, err := s.Get(ctx, "roles/"+credentialName)
 	if shouldLock {
 		b.credentialMutex.RUnlock()
 	}
@@ -209,7 +231,7 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 		b.credentialMutex.Lock()
 		defer b.credentialMutex.Unlock()
 	}
-	entry, err = s.Get(ctx, "credential/"+credentialName)
+	entry, err = s.Get(ctx, "roles/"+credentialName)
 	if err != nil {
 		return nil, err
 	}
@@ -224,18 +246,22 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 }
 
 type atlasCredentialEntry struct {
-	CredentialType string `json:"credential_type"`
-	ProjectID      string `json:"project_id"`
-	DatabaseName   string `json:"database_name"`
-	Roles          string `json:"roles"`
+	CredentialType       string   `json:"credential_type"`
+	ProjectID            string   `json:"project_id"`
+	DatabaseName         string   `json:"database_name"`
+	Roles                string   `json:"roles"`
+	ProgrammaticKeyRoles []string `json:"programmatic_key_roles"`
+	OrganizationID       string   `json:"organization_id"`
 }
 
 func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 	respData := map[string]interface{}{
-		"credential_type": r.CredentialType,
-		"project_id":      r.ProjectID,
-		"database_name":   r.DatabaseName,
-		"roles":           r.Roles,
+		"credential_type":        r.CredentialType,
+		"project_id":             r.ProjectID,
+		"database_name":          r.DatabaseName,
+		"roles":                  r.Roles,
+		"programmatic_key_roles": r.ProgrammaticKeyRoles,
+		"organization_id":        r.OrganizationID,
 	}
 	return respData
 }

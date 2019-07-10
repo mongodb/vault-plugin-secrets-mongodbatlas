@@ -14,7 +14,7 @@ import (
 
 func pathDatabaseUser(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "(creds|keys)/" + framework.GenericNameRegex("name"),
+		Pattern: "creds/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,
@@ -49,12 +49,21 @@ func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request
 		leaseConfig = &configLease{}
 	}
 
-	return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
+	switch cred.CredentialType {
+	case databaseUser:
+		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
+	case programmaticAPIKey:
+		return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
+	}
+
+	return nil, nil
 }
 
 type walDatabaseUser struct {
-	UserName  string
-	ProjectID string
+	UserName             string
+	ProjectID            string
+	OrganizationID       string
+	ProgrammaticAPIKeyID string
 }
 
 func genUsername(displayName string) (ret string) {

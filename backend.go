@@ -46,6 +46,7 @@ func NewBackend() *Backend {
 
 		Secrets: []*framework.Secret{
 			databaseUsers(&b),
+			programmaticAPIKeys(&b),
 		},
 
 		WALRollbackMinAge: minUserRollbackAge,
