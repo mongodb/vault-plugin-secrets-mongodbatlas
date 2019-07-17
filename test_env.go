@@ -130,9 +130,27 @@ func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type":        "programmatic_api_key",
+			"credential_type":        "org_programmatic_api_key",
 			"organization_id":        e.OrganizationID,
 			"programmatic_key_roles": roles,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectID(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"credential_type":        "project_programmatic_api_key",
+			"programmatic_key_roles": roles,
+			"project_id":             e.ProjectID,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
