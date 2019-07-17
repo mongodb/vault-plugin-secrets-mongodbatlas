@@ -106,20 +106,22 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		}
 		credentialEntry.CredentialType = credentialType
 
+		if projectIDRaw, ok := d.GetOk("project_id"); ok {
+			projectID := projectIDRaw.(string)
+			credentialEntry.ProjectID = projectID
+		}
 		switch credentialType {
 		case databaseUser:
-			if projectIDRaw, ok := d.GetOk("project_id"); ok {
-				projectID := projectIDRaw.(string)
-				credentialEntry.ProjectID = projectID
-			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s", databaseUser))
-			}
 
 			if databaseNameRaw, ok := d.GetOk("database_name"); ok {
 				databaseName := databaseNameRaw.(string)
 				credentialEntry.DatabaseName = databaseName
 			} else {
 				resp.AddWarning(fmt.Sprintf("project_id required for %s", databaseUser))
+			}
+
+			if _, ok := d.GetOk("project_id"); !ok {
+				resp.AddWarning(fmt.Sprintf("project_id required for %s ", databaseUser))
 			}
 
 			if rolesRaw, ok := d.GetOk("roles"); ok {
