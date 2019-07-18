@@ -1,15 +1,17 @@
-# Vault Plugin: MongoDB Platform Secrets Backend
+# Vault Plugin: MongoDB Atlas Secrets Backend
 
-This is a backend plugin to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
-This plugin generates unique, ephemeral API keys and STS credentials.
+This is a Secrets engine to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
+This plugin generates unique, ephemeral datababase user credentials and programmatic API keys.
 
 **Please note**: We take Vault's security and our users' trust very seriously. 
 If you believe you have found a security issue in Vault or with this plugin, 
 _please responsibly disclose_ by 
-contacting us at [security@hashicorp.com](mailto:security@hashicorp.com).
+contacting us at [security@hashicorp.com](mailto:security@hashicorp.com) and contact MongoDB
+directly via [security@mongodb.com](mailto:security@mongodb.com) or [open a ticket](https://jira.mongodb.org/plugins/servlet/samlsso?redirectTo=%2Fbrowse%2FSECURITY) (link is external).
 
 ## Quick Links
 - [Vault Website](https://www.vaultproject.io)
+- [MongoDB Atlas Website](https://www.mongodb.com/cloud/atlas)
 - [Atlas MongoDB Secrets Docs](https://www.vaultproject.io/docs/secrets/atlasmongodb/index.html)
 - [Vault Github](https://www.github.com/hashicorp/vault)
 - [General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
@@ -17,6 +19,8 @@ contacting us at [security@hashicorp.com](mailto:security@hashicorp.com).
 
 
 ## Usage
+
+**The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow the instructions in the developing section that follows:**
 
 This is a [Vault plugin](https://www.vaultproject.io/docs/internals/plugins.html)
 and is meant to work with Vault. This guide assumes you have already installed Vault
@@ -131,6 +135,8 @@ $ go test
 ```
 
 ## Other Docs
+
+**The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow read the docs within this repo for more information.**
 
 See up-to-date [docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
 and general [API docs](https://www.vaultproject.io/api/secret/mongodbatlas/index.html).
