@@ -77,7 +77,7 @@ the IAM credentials:
     database user mapped to the appropriate database/collection. Vault will then create 
     an username and password for the database user and return these credentials.
 
-        ```text
+    ```text
     $ vault read mongodbatlas/creds/test
         Key                Value
         ---                -----
@@ -90,4 +90,58 @@ the IAM credentials:
 
     For more information on database user roles, please see the
     [MongoDB Atlas documentation](https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/).
+
+## Programmatic API Keys
+  To grant programmatic access to an organization or project using only the API, you can create an API key. API keys:
+
+  Have two parts: a Public Key and a Private Key.
+  Cannot be used to log into Atlas through the user interface.
+  Must be granted roles as you would Users to make sure the API Keys can call API endpoints without errors.
+  Can belong to one organization, but may be granted access to any number of projects in that organization.
+
+
+  Most secrets engines must be configured in advance before they can perform their
+  functions. These steps are usually completed by an operator or configuration
+  management tool.
+
+
+  ~> **Notice:** Even though the path above is `atlas/config/root`, do not use
+  your MongoDB Atlas root account credentials. Instead generate a dedicated user or
+  role.
+
+
+1. Configure a Vault role that maps to a set of permissions in MongoDB Atlas as well as an
+   MongoDB Atlas credential type. When users generate credentials, they are generated
+   against this role and can use `organization_id` or `project_id` (if you will used `project_id` you need to change `organization_id` instead). An example:
+
+    ```bash
+    $ vault write atlas/roles/test \
+        credential_type=org_programmatic_api_key \
+        organization_id=5b23ff2f96e82130d0aaec13 \
+        programmatic_key_roles=ORG_MEMBER
+    ```
+
+    or
+
+     ```bash
+    $ vault write atlas/roles/test \
+        credential_type=org_programmatic_api_key \
+        project_id=5b23ff2f96e82130d0aaec13 \
+        programmatic_key_roles=ORG_MEMBER
+    ```
+
+    This creates a role named "test" that is attached to an `organization_id` or `project_id` instead.
+
+    ```bash 
+    $ vault read atlas/creds/test
+
+    Key                Value
+    ---                -----
+    lease_id           atlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
+    lease_duration     20s
+    lease_renewable    true
+    description        vault-test-1563980947-1318
+    private_key        905ae89e-6ee8-40rd-ab12-613t8e3fe836
+    public_key         klpruxce
+    ```
 
