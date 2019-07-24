@@ -112,7 +112,7 @@ the IAM credentials:
 
 1. Configure a Vault role that maps to a set of permissions in MongoDB Atlas as well as an
    MongoDB Atlas credential type. When users generate credentials, they are generated
-   against this role and can use `organization_id` or `project_id` (if you will used `project_id` you need to change `organization_id` instead). An example:
+   against this role and can use `organization_id` or `project_id` (if you will want to bind the Programmatic API key to a project, use `project_id` instead of `organization_id` and `credential_type` should be project_programmatic_api_key). An example:
 
     ```bash
     $ vault write atlas/roles/test \
@@ -125,12 +125,14 @@ the IAM credentials:
 
      ```bash
     $ vault write atlas/roles/test \
-        credential_type=org_programmatic_api_key \
+        credential_type=project_programmatic_api_key \
         project_id=5b23ff2f96e82130d0aaec13 \
         programmatic_key_roles=ORG_MEMBER
     ```
 
-    This creates a role named "test" that is attached to an `organization_id` or `project_id` instead.
+  ~> **Notice:**  Vault will create an `org_programmatic_api_key` or `project_programmatic_api_key` depending on the configuration as in the previous example.
+
+   This creates a set of Programmatic API keys that is attached to an [Organization](https://docs.atlas.mongodb.com/configure-api-access/#view-the-details-of-an-api-key-in-an-organization), if `project_id` is used, is attached to a [Project](https://docs.atlas.mongodb.com/configure-api-access/#manage-programmatic-access-to-a-project).
 
     ```bash 
     $ vault read atlas/creds/test
