@@ -37,10 +37,10 @@ func NewBackend() *Backend {
 		},
 
 		Paths: []*framework.Path{
-			pathListCredentials(&b),
-			pathCredentials(&b),
+			pathRolesList(&b),
+			pathRoles(&b),
 			pathConfigRoot(&b),
-			pathDatabaseUser(&b),
+			pathCredentials(&b),
 			pathConfigLease(&b),
 		},
 
