@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
+	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mongodb-partners/go-client-mongodb-atlas/mongodbatlas"
 )
 
 func programmaticAPIKeys(b *Backend) *framework.Secret {
