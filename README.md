@@ -1,9 +1,10 @@
-# Vault Plugin: MongoDB Atlas Secrets Backend
+# Vault Plugin: MongoDB Atlas Secrets Engine
 
 This is a Secrets engine to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
 This plugin generates unique, ephemeral datababase user credentials and programmatic API keys.
 
-**Please note**: We take Vault's security and our users' trust very seriously. 
+**Please note**: Hashicorp takes Vault's security and their users' trust very seriously, as does MongoDB.
+
 If you believe you have found a security issue in Vault or with this plugin, 
 _please responsibly disclose_ by 
 contacting us at [security@hashicorp.com](mailto:security@hashicorp.com) and contact MongoDB
@@ -136,7 +137,7 @@ $ go test
 
 ## Other Docs
 
-**The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow read the docs within this repo for more information.**
+**The following will be accurate after review and approval by Hashicorp, which is in progress. Until then read the docs within this repo for more information.**
 
 See up-to-date [docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
 and general [API docs](https://www.vaultproject.io/api/secret/mongodbatlas/index.html).
