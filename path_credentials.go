@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathDatabaseUser(b *Backend) *framework.Path {
+func pathCredentials(b *Backend) *framework.Path {
 	return &framework.Path{
 		Pattern: "creds/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
@@ -22,17 +22,17 @@ func pathDatabaseUser(b *Backend) *framework.Path {
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.ReadOperation:   b.pathDatabaseUserRead,
-			logical.UpdateOperation: b.pathDatabaseUserRead,
+			logical.ReadOperation:   b.pathCredentialsRead,
+			logical.UpdateOperation: b.pathCredentialsRead,
 		},
 
-		HelpSynopsis:    pathDatabaseUserHelpSyn,
-		HelpDescription: pathDatabaseUserHelpDesc,
+		HelpSynopsis:    pathCredentialsHelpSyn,
+		HelpDescription: pathCredentialsHelpDesc,
 	}
 
 }
 
-func (b *Backend) pathDatabaseUserRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	userName := d.Get("name").(string)
 
 	cred, err := b.credentialRead(ctx, req.Storage, userName, true)
@@ -79,5 +79,5 @@ func normalizeDisplayName(displayName string) string {
 
 }
 
-const pathDatabaseUserHelpSyn = ``
-const pathDatabaseUserHelpDesc = ``
+const pathCredentialsHelpSyn = ``
+const pathCredentialsHelpDesc = ``

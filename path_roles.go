@@ -11,35 +11,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathListCredentials(b *Backend) *framework.Path {
-	return &framework.Path{
-		Pattern: "roles/?$",
-
-		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.ListOperation: b.pathCredentialList,
-		},
-
-		HelpSynopsis:    pathListRolesHelpSyn,
-		HelpDescription: pathListRolesHelpDesc,
-	}
-}
-
-func (b *Backend) pathCredentialList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	b.credentialMutex.RLock()
-	defer b.credentialMutex.RUnlock()
-	entries, err := req.Storage.List(ctx, "roles/")
-	if err != nil {
-		return nil, err
-	}
-
-	if b.logger.IsDebug() {
-		b.logger.Debug(fmt.Sprintf("Entries %+v", entries))
-	}
-
-	return logical.ListResponse(entries), nil
-}
-
-func pathCredentials(b *Backend) *framework.Path {
+func pathRoles(b *Backend) *framework.Path {
 	return &framework.Path{
 		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
@@ -74,23 +46,24 @@ func pathCredentials(b *Backend) *framework.Path {
 				Description: fmt.Sprintf("Organization ID for the credential, required for %s", programmaticAPIKey),
 			},
 		},
+		// Create for withelist
 		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.DeleteOperation: b.pathCredentialsDelete,
-			logical.ReadOperation:   b.pathCredentialsRead,
-			logical.UpdateOperation: b.pathCredentialsWrite,
+			logical.DeleteOperation: b.pathRolesDelete,
+			logical.ReadOperation:   b.pathRolesRead,
+			logical.UpdateOperation: b.pathRolesWrite,
 		},
 
-		HelpSynopsis:    pathCredentialsHelpSyn,
-		HelpDescription: pathCredentialsHelpDesc,
+		HelpSynopsis:    pathRolesHelpSyn,
+		HelpDescription: pathRolesHelpDesc,
 	}
 }
 
-func (b *Backend) pathCredentialsDelete(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) pathRolesDelete(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	err := req.Storage.Delete(ctx, "roles/"+d.Get("name").(string))
 	return nil, err
 }
 
-func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) pathRolesRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	entry, err := b.credentialRead(ctx, req.Storage, d.Get("name").(string), true)
 	if err != nil {
 		return nil, err
@@ -103,7 +76,7 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 	}, nil
 }
 
-func (b *Backend) pathCredentialsWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	var resp logical.Response
 
 	credentialName := d.Get("name").(string)
@@ -272,9 +245,7 @@ func compactJSON(input string) (string, error) {
 	return compacted.String(), err
 }
 
-const pathListRolesHelpSyn = ``
-const pathListRolesHelpDesc = ``
-const pathCredentialsHelpSyn = ``
-const pathCredentialsHelpDesc = ``
+const pathRolesHelpSyn = ``
+const pathRolesHelpDesc = ``
 const databaseUser = `database_user`
 const programmaticAPIKey = `programmatic_api_key`
