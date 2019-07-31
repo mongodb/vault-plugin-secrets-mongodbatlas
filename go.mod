@@ -1,4 +1,4 @@
-module github.com/mongodb-partners/vault-plugin-secrets-mongodb-atlas
+module github.com/mongodb/vault-plugin-secrets-mongodbatlas
 
 go 1.12
 
@@ -9,8 +9,6 @@ require (
 	github.com/hashicorp/vault/api v1.0.2
 	github.com/hashicorp/vault/sdk v0.1.11
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/mongodb-partners/go-client-mongodb-atlas v0.0.0
+	github.com/mongodb/go-client-mongodb-atlas v0.0.1
 	github.com/sethvargo/go-password v0.1.2
 )
-
-replace github.com/mongodb-partners/go-client-mongodb-atlas v0.0.0 => ../go-client-mongodb-atlas/

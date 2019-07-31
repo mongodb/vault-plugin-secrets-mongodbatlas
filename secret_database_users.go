@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mongodb-partners/go-client-mongodb-atlas/mongodbatlas"
+	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 	"github.com/sethvargo/go-password/password"
 )
 
