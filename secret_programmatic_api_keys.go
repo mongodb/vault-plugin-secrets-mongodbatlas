@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
-	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
 func programmaticAPIKeys(b *Backend) *framework.Secret {
@@ -43,25 +43,36 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
 	}
-	walID, err := framework.PutWAL(ctx, s, databaseUser, &walDatabaseUser{
+	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walDatabaseUser{
 		UserName: username,
 	})
 	if err != nil {
 		return nil, errwrap.Wrapf("error writing WAL entry: {{err}}", err)
 	}
 
-	key, _, err := client.APIKeys.Create(context.Background(), cred.OrganizationID, &mongodbatlas.APIKeyInput{
-		Desc:  username,
-		Roles: cred.ProgrammaticKeyRoles,
-	})
+	var key *mongodbatlas.APIKey
+
+	switch cred.CredentialType {
+	case orgProgrammaticAPIKey:
+		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
+			&mongodbatlas.APIKeyInput{
+				Desc:  username,
+				Roles: cred.ProgrammaticKeyRoles,
+			})
+	case projectProgrammaticAPIKey:
+		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID, &mongodbatlas.APIKeyInput{
+			Desc:  username,
+			Roles: cred.ProgrammaticKeyRoles,
+		})
+	}
 
 	if err != nil {
 		if walErr := framework.DeleteWAL(ctx, s, walID); walErr != nil {
-			dbUserErr := errwrap.Wrapf("error creating programmaticAPIKey user: {{err}}", err)
+			dbUserErr := errwrap.Wrapf("error creating programmaticAPIKey: {{err}}", err)
 			return nil, errwrap.Wrap(errwrap.Wrapf("failed to delete WAL entry: {{err}}", walErr), dbUserErr)
 		}
 		return logical.ErrorResponse(fmt.Sprintf(
-			"Error creating programmatic api key user user: %s", err)), err
+			"Error creating programmatic api key: %s", err)), err
 	}
 
 	if err := framework.DeleteWAL(ctx, s, walID); err != nil {
@@ -76,6 +87,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		"programmaticapikeyid": key.ID,
 		"projectid":            cred.ProjectID,
 		"organizationid":       cred.OrganizationID,
+		"credentialtype":       cred.CredentialType,
 	})
 
 	resp.Secret.TTL = lease.TTL
@@ -95,21 +107,73 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	if !ok {
 		return nil, fmt.Errorf("secret is missing programmatic api key id internal data")
 	}
-	organizationIDRaw, ok := req.Secret.InternalData["organizationid"]
+	credentialTypeRaw, ok := req.Secret.InternalData["credentialtype"]
 	if !ok {
-		return nil, fmt.Errorf("secret is missing organization id internal data")
+		return nil, fmt.Errorf("secret is missing credential type internal data")
 	}
 
-	organizationID, ok := organizationIDRaw.(string)
+	credentialType, ok := credentialTypeRaw.(string)
 	if !ok {
-		return nil, fmt.Errorf("secret is missing organization id internal data")
+		return nil, fmt.Errorf("secret is missing credential type internal internal data")
 	}
 
+	var organizationID string
+	var projectID string
+	var data map[string]interface{}
+
+	switch credentialType {
+	case orgProgrammaticAPIKey:
+		organizationIDRaw, ok := req.Secret.InternalData["organizationid"]
+		if !ok {
+			return nil, fmt.Errorf("secret is missing organization id internal data")
+		}
+
+		organizationID, ok = organizationIDRaw.(string)
+		if !ok {
+			return nil, fmt.Errorf("secret is missing organization id internal data")
+		}
+
+		data = map[string]interface{}{
+			"organizationid":       organizationID,
+			"programmaticapikeyid": programmaticAPIKeyID,
+			"credentialtype":       credentialType,
+		}
+
+	case programmaticAPIKeyID:
+		projectIDRaw, ok := req.Secret.InternalData["projectid"]
+		if !ok {
+			return nil, fmt.Errorf("secret is missing project id internal data")
+		}
+
+		projectID, ok = projectIDRaw.(string)
+		if !ok {
+			return nil, fmt.Errorf("secret is missing project id internal data")
+		}
+
+		data = map[string]interface{}{
+			"projectid":            projectID,
+			"programmaticapikeyid": programmaticAPIKeyID,
+			"credentialtype":       credentialType,
+		}
+	case programmaticAPIKeyID:
+		projectIDRaw, ok := req.Secret.InternalData["projectid"]
+		if !ok {
+			return nil, fmt.Errorf("secret is missing project id internal data")
+		}
+
+		projectID, ok = projectIDRaw.(string)
+		if !ok {
+			return nil, fmt.Errorf("secret is missing project id internal data")
+		}
+
+		data = map[string]interface{}{
+			"projectid":            projectID,
+			"programmaticapikeyid": programmaticAPIKeyID,
+			"credentialtype":       credentialType,
+		}
+	}
 	// Use the user rollback mechanism to delete this database_user
-	err := b.pathProgrammaticAPIKeyRollback(ctx, req, programmaticAPIKey, map[string]interface{}{
-		"organizationid":       organizationID,
-		"programmaticapikeyid": programmaticAPIKeyID,
-	})
+	err := b.pathProgrammaticAPIKeyRollback(ctx, req, programmaticAPIKey, data)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +186,6 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 	if err := mapstructure.Decode(data, &entry); err != nil {
 		return err
 	}
-	organizationID := entry.OrganizationID
-	programmaticAPIKeyID := entry.ProgrammaticAPIKeyID
 
 	// Get the client
 	client, err := b.clientMongo(ctx, req.Storage)
@@ -131,23 +193,35 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		return nil
 	}
 
-	// check if the user exists or not
-	_, res, err := client.APIKeys.Get(context.Background(), organizationID, programmaticAPIKeyID)
-	// if the user is gone, move along
-	if err != nil {
-		if res != nil && res.StatusCode == http.StatusNotFound {
-			return nil
+	switch entry.CredentialType {
+	case orgProgrammaticAPIKey:
+		// check if the user exists or not
+		_, res, err := client.APIKeys.Get(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		// if the user is gone, move along
+		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return err
 		}
-		return err
-	}
 
-	// now, delete the user
-	res, err = client.APIKeys.Delete(context.Background(), organizationID, programmaticAPIKeyID)
-	if err != nil {
-		if res != nil && res.StatusCode == http.StatusNotFound {
-			return nil
+		// now, delete the api key
+		res, err = client.APIKeys.Delete(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return err
 		}
-		return err
+	case projectProgrammaticAPIKey:
+		// now, delete the user
+		res, err := client.ProjectAPIKeys.Unassign(context.Background(), entry.ProjectID, entry.ProgrammaticAPIKeyID)
+		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return err
+		}
 	}
 
 	return nil
