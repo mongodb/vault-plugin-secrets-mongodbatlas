@@ -115,20 +115,26 @@ the IAM credentials:
 - If the key/role is for the MongoDB Atlas Organization level use organization_id with the appropriate Id and roles
 - If the key/role is for the MongoDB Atlas Project level use project_id with the appropriate Id and roles
 
-~> **Notice:** Programmatic API keys can belong to only one Organization but can belong to one or more Projects. An example:
+~> **Notice:** Programmatic API keys can belong to only one Organization but can belong to one or more Projects. An examples:
 
 ```bash
 $ vault write atlas/roles/test \
     credential_type=org_programmatic_api_key \
     organization_id=5b23ff2f96e82130d0aaec13 \
     programmatic_key_roles=ORG_MEMBER
-
-or
-
+```
+```bash 
 $ vault write atlas/roles/test \
     credential_type=project_programmatic_api_key \
-    project_id=5b23ff2f96e82130d0aaec13 \
-    programmatic_key_roles=ORG_MEMBER
+    project_id=5cf5a45a9ccf6400e60981b6 \
+    programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY
+```
+
+```bash 
+$ vault write atlas/roles/test \
+    credential_type=project_programmatic_api_key \
+    project_id=5cf5a45a9ccf6400e60981b6 \
+    programmatic_key_roles=GROUP_CLUSTER_MANAGER
 ```
 
   ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.atlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
