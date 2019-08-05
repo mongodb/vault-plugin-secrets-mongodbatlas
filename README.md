@@ -53,7 +53,7 @@ Clone this repository:
 
 ```
 
-mkdir $GOPATH/src/github.com/hashicorp/vault-plugin-secrets-alicloud`
+mkdir $GOPATH/src/github.com/hashicorp/vault-plugin-secrets-mongodbatlas`
 cd $GOPATH/src/github.com/hashicorp/
 git clone git@github.com:mongodb/vault-plugin-secrets-mongodbatlas.git
 
@@ -95,7 +95,7 @@ $ vault server -config=path/to/config.json ...
 Once the server is started, register the plugin in the Vault server's [plugin catalog](https://www.vaultproject.io/docs/internals/plugins.html#plugin-catalog):
 
 ```sh
-$ vault write sys/plugins/catalog/alicloudsecrets \
+$ vault write sys/plugins/catalog/mongodbatlassecrets \
         sha_256="$(shasum -a 256 path/to/plugin/directory/vault-plugin-secrets-mongodbatlas | cut -d " " -f1)" \
         command="vault-plugin-secrets-mongodbatlas"
 ```

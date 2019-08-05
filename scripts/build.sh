@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TOOL=vault-plugin-secrets-alicloud
+TOOL=vault-plugin-secrets-mongodbatlas
 #
 # This script builds the application from source for multiple platforms.
 set -e
