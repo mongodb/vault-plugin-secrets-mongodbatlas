@@ -26,6 +26,9 @@ Most Secrets Engines must be configured in advance before they can perform their
 functions. These steps are usually completed by an operator or configuration
 management tool.
 
+  ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow the instructions in the [README developing section](./../../../../../README.md).
+
+
 1. Enable the MongoDB Atlas Secrets Engine:
 
     ```bash
@@ -36,8 +39,7 @@ management tool.
     By default, the Secrets Engine will mount at the name of the engine. To
     enable the Secrets Engine at a different path, use the `-path` argument.
 
-1. Configure the MongoDB credentials/keys that Vault uses to communicate with AWS to generate
-the IAM credentials:
+1. Configure the MongoDB credentials/keys that Vault uses to communicate with MongoDB Atlas:
 
     ```bash
     $ vault write mongodbatlas/config/root \
@@ -85,8 +87,8 @@ the IAM credentials:
         username           vault-test-1563475091-2081
     ```
 
-    For more information on database user roles, please see the
-    [MongoDB Atlas documentation](https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/).
+    For more information on database user roles, please see
+    [step two of the setup section](#Setup).
 
 ## Programmatic API Keys
 

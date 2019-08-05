@@ -128,6 +128,10 @@ data behind. Therefore, please run the acceptance tests at your own risk.
 At the very least, we recommend running them in their own private
 account for whatever backend you're testing.
 
+To run the acceptance tests, you need exporting the following environment variables:
+
+
+
 To run the acceptance tests, after exporting the necessary environment variables, 
 from the home directory run `go test`:
 
