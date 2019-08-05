@@ -38,7 +38,6 @@ func databaseUsers(b *Backend) *framework.Secret {
 	}
 }
 
-
 func (b *Backend) databaseUserRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	// Get the lease (if any)
 	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)

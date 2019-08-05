@@ -56,6 +56,24 @@ func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
 
 }
 
+func TestAcceptanceProgrammaticAPIKey_WithProjectID(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
+
+	acceptanceTestEnv, err := newAcceptanceTestEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("add config", acceptanceTestEnv.AddConfig)
+	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithProjectID)
+	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+
+}
+
 func newAcceptanceTestEnv() (*testEnv, error) {
 	ctx := context.Background()
 	conf := &logical.BackendConfig{

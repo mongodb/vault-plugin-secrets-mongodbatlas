@@ -52,7 +52,7 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 	switch cred.CredentialType {
 	case databaseUser:
 		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
-	case programmaticAPIKey:
+	case orgProgrammaticAPIKey, projectProgrammaticAPIKey:
 		return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
 	}
 
@@ -64,6 +64,7 @@ type walDatabaseUser struct {
 	ProjectID            string
 	OrganizationID       string
 	ProgrammaticAPIKeyID string
+	CredentialType       string
 }
 
 func genUsername(displayName string) (ret string) {

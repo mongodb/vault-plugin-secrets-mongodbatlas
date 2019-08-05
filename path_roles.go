@@ -23,11 +23,11 @@ func pathRoles(b *Backend) *framework.Path {
 
 			"credential_type": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Type of credential to retrieve. Must be one of %s or %s", databaseUser, programmaticAPIKey),
+				Description: fmt.Sprintf("Type of credential to retrieve. Must be one of %s, %s or %s", databaseUser, orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"project_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Project ID the credential belongs to, required for %s", databaseUser),
+				Description: fmt.Sprintf("Project ID the credential belongs to, required for %s or %s", databaseUser, projectProgrammaticAPIKey),
 			},
 			"database_name": &framework.FieldSchema{
 				Type:        framework.TypeString,
@@ -39,11 +39,11 @@ func pathRoles(b *Backend) *framework.Path {
 			},
 			"programmatic_key_roles": &framework.FieldSchema{
 				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("Roles for a programmatic API key, required for %s", programmaticAPIKey),
+				Description: fmt.Sprintf("Roles for a programmatic API key, required for %s or %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"organization_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Organization ID for the credential, required for %s", programmaticAPIKey),
+				Description: fmt.Sprintf("Organization ID for the credential, required for %s", orgProgrammaticAPIKey),
 			},
 		},
 		// Create for withelist
@@ -97,7 +97,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 	if credentialTypeRaw, ok := d.GetOk("credential_type"); ok {
 		credentialType := credentialTypeRaw.(string)
-		allowedCredentialTypes := []string{databaseUser, programmaticAPIKey}
+		allowedCredentialTypes := []string{databaseUser, orgProgrammaticAPIKey, projectProgrammaticAPIKey}
 		if credentialType == "" {
 			return logical.ErrorResponse("emtpy credential_type"), nil
 		}
@@ -108,18 +108,19 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 		switch credentialType {
 		case databaseUser:
-			if projectIDRaw, ok := d.GetOk("project_id"); ok {
-				projectID := projectIDRaw.(string)
-				credentialEntry.ProjectID = projectID
-			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s", databaseUser))
-			}
 
 			if databaseNameRaw, ok := d.GetOk("database_name"); ok {
 				databaseName := databaseNameRaw.(string)
 				credentialEntry.DatabaseName = databaseName
 			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s", databaseUser))
+				resp.AddWarning(fmt.Sprintf("database_name required for %s", databaseUser))
+			}
+
+			if projectIDRaw, ok := d.GetOk("project_id"); ok {
+				projectID := projectIDRaw.(string)
+				credentialEntry.ProjectID = projectID
+			} else {
+				resp.AddWarning(fmt.Sprintf("project_id required for %s ", databaseUser))
 			}
 
 			if rolesRaw, ok := d.GetOk("roles"); ok {
@@ -132,18 +133,33 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 				}
 				credentialEntry.Roles = compacted
 			}
-		case programmaticAPIKey:
+
+		case orgProgrammaticAPIKey:
 			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
 				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
 			} else {
-				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", programmaticAPIKey))
+				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", orgProgrammaticAPIKey))
 			}
 			if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
 				organizatioID := organizatioIDRaw.(string)
 				credentialEntry.OrganizationID = organizatioID
 			} else {
-				resp.AddWarning(fmt.Sprintf("organization_id required for %s", programmaticAPIKey))
+				resp.AddWarning(fmt.Sprintf("organization_id required for %s", orgProgrammaticAPIKey))
 			}
+
+		case projectProgrammaticAPIKey:
+			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
+				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
+			} else {
+				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", orgProgrammaticAPIKey))
+			}
+			if projectIDRaw, ok := d.GetOk("project_id"); ok {
+				projectID := projectIDRaw.(string)
+				credentialEntry.ProjectID = projectID
+			} else {
+				resp.AddWarning(fmt.Sprintf("project_id required for %s ", databaseUser))
+			}
+
 		default:
 			return logical.ErrorResponse("Unsupported credential_type %s", credentialType), nil
 		}
@@ -248,4 +264,6 @@ func compactJSON(input string) (string, error) {
 const pathRolesHelpSyn = ``
 const pathRolesHelpDesc = ``
 const databaseUser = `database_user`
+const orgProgrammaticAPIKey = `org_programmatic_api_key`
+const projectProgrammaticAPIKey = `project_programmatic_api_key`
 const programmaticAPIKey = `programmatic_api_key`
