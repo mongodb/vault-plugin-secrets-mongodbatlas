@@ -39,7 +39,15 @@ management tool.
     By default, the Secrets Engine will mount at the name of the engine. To
     enable the Secrets Engine at a different path, use the `-path` argument.
 
-1. Configure the MongoDB credentials/keys that Vault uses to communicate with MongoDB Atlas:
+1. It's necessary to generate and configure an API key for your organization for the acceptance test to succeed. To grant programmatic access to an organization or project using only the [API](https://docs.atlas.mongodb.com/api/) you need to know:
+
+    1. The programmatic API key has two parts: a Public Key and a Private Key. To see more details on how to create a programmatic API key visit https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys.
+    
+    1. The programmatic API key must be granted roles sufficient for the acceptance test to succeed. The Organization Owner and Project Owner roles should be sufficient. You can see the available roles at https://docs.atlas.mongodb.com/reference/user-roles.
+
+    1. You must [configure Atlas API Access](https://docs.atlas.mongodb.com/configure-api-access/) for your programmatic API key. You should allow API access for the IP address from which the acceptance test runs.
+
+1. Later you must configure the MongoDB credentials/keys created in the previous step, which Vault will use to communicate with MongoDB Atlas:
 
     ```bash
     $ vault write mongodbatlas/config/root \
