@@ -61,6 +61,30 @@ func (e *testEnv) AddRole(t *testing.T) {
 	// }
 }
 
+func (e *testEnv) AddRoleWithTTL(t *testing.T) {
+	roles := `[{"databaseName":"admin","roleName":"atlasAdmin"}]`
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-credential",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"credential_type": "database_user",
+			"project_id":      e.ProjectID,
+			"database_name":   "admin",
+			"roles":           roles,
+			"ttl":             2000,
+			"max_ttl":         4000,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+	// if resp != nil {
+	// 	t.Fatal("expected nil response to represent a 204")
+	// }
+}
+
 func (e *testEnv) ReadDatabaseUserCreds(t *testing.T) {
 	req := &logical.Request{
 		Operation: logical.ReadOperation,
