@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/helper/strutil"
@@ -44,6 +45,14 @@ func pathRoles(b *Backend) *framework.Path {
 			"organization_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
 				Description: fmt.Sprintf("Organization ID for the credential, required for %s", orgProgrammaticAPIKey),
+			},
+			"ttl": {
+				Type:        framework.TypeDurationSecond,
+				Description: `Duration in seconds after which the issued token should expire. Defaults to 0, in which case the value will fallback to the system/mount defaults.`,
+			},
+			"max_ttl": {
+				Type:        framework.TypeDurationSecond,
+				Description: "The maximum allowed lifetime of tokens issued using this role.",
 			},
 		},
 		// Create for withelist
@@ -165,6 +174,18 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		}
 	}
 
+	if ttlRaw, ok := d.GetOk("ttl"); ok {
+		credentialEntry.TTL = time.Duration(ttlRaw.(int)) * time.Second
+	}
+
+	if maxttlRaw, ok := d.GetOk("max_ttl"); ok {
+		credentialEntry.MaxTTL = time.Duration(maxttlRaw.(int)) * time.Second
+	}
+
+	if credentialEntry.MaxTTL > 0 && credentialEntry.TTL > credentialEntry.MaxTTL {
+		return logical.ErrorResponse("ttl exceeds max_ttl"), nil
+	}
+
 	err = setAtlasCredential(ctx, req.Storage, credentialName, credentialEntry)
 	if err != nil {
 		return nil, err
@@ -235,12 +256,14 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 }
 
 type atlasCredentialEntry struct {
-	CredentialType       string   `json:"credential_type"`
-	ProjectID            string   `json:"project_id"`
-	DatabaseName         string   `json:"database_name"`
-	Roles                string   `json:"roles"`
-	ProgrammaticKeyRoles []string `json:"programmatic_key_roles"`
-	OrganizationID       string   `json:"organization_id"`
+	CredentialType       string        `json:"credential_type"`
+	ProjectID            string        `json:"project_id"`
+	DatabaseName         string        `json:"database_name"`
+	Roles                string        `json:"roles"`
+	ProgrammaticKeyRoles []string      `json:"programmatic_key_roles"`
+	OrganizationID       string        `json:"organization_id"`
+	TTL                  time.Duration `json:"ttl"`
+	MaxTTL               time.Duration `json:"max_ttl"`
 }
 
 func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
@@ -251,6 +274,8 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"roles":                  r.Roles,
 		"programmatic_key_roles": r.ProgrammaticKeyRoles,
 		"organization_id":        r.OrganizationID,
+		"ttl":                    r.TTL,
+		"max_ttl":                r.MaxTTL,
 	}
 	return respData
 }
