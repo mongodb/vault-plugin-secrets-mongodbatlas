@@ -274,8 +274,8 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"roles":                  r.Roles,
 		"programmatic_key_roles": r.ProgrammaticKeyRoles,
 		"organization_id":        r.OrganizationID,
-		"ttl":                    r.TTL,
-		"max_ttl":                r.MaxTTL,
+		"ttl":                    r.TTL.String(),
+		"max_ttl":                r.MaxTTL.String(),
 	}
 	return respData
 }
