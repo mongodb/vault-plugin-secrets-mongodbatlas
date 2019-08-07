@@ -151,7 +151,7 @@ $ vault write atlas/roles/test \
 
    This creates a set of Programmatic API keys that is attached to an [Organization](https://docs.atlas.mongodb.com/configure-api-access/#view-the-details-of-an-api-key-in-an-organization), if `project_id` is used, is attached to a [Project](https://docs.atlas.mongodb.com/configure-api-access/#manage-programmatic-access-to-a-project).
 
-    ```bash 
+  ```bash 
     $ vault read atlas/creds/test
 
     Key                Value
@@ -162,5 +162,46 @@ $ vault write atlas/roles/test \
     description        vault-test-1563980947-1318
     private_key        905ae89e-6ee8-40rd-ab12-613t8e3fe836
     public_key         klpruxce
-    ```
+  ```
 
+## TTL and Max TTL
+
+
+Every role has a time-to-live (TTL) and maximum time-to-live (Max TTL) which is used to validate the TTL.  When a role expires and it's not renewed, the role is automatically revoked. You can set the TTL and Max TTL for each created role.
+```bash 
+$ vault write atlas/roles/test \
+    credential_type=project_programmatic_api_key \
+    project_id=5cf5a45a9ccf6400e60981b6 \
+    programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY \
+    ttl=2h \
+    max_ttl=5h
+```
+
+This creates a role that is attached to an associated lease:
+```bash
+$ vault read atlas/creds/test
+
+    Key                Value
+    ---                -----
+    lease_id           atlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
+    lease_duration     2h
+    lease_renewable    true
+    description        vault-test-1563980947-1318
+    private_key        905ae89e-6ee8-40rd-ab12-613t8e3fe836
+    public_key         klpruxce
+```
+
+You can verify the role that you have created before with:
+```bash
+$ vault read atlas/roles/test   
+    Key                       Value
+    ---                       -----
+    credential_type           org_programmatic_api_key
+    database_name             n/a
+    max_ttl                   5h0m0s
+    organization_id           5b71ff2f96e82120d0aaec14
+    programmatic_key_roles    [GROUP_DATA_ACCESS_READ_ONLY]
+    project_id                5cf5a45a9ccf6400e60981b6
+    roles                     n/a
+    ttl                       2h0m0s
+```
