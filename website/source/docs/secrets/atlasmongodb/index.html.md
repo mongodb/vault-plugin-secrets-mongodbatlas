@@ -205,3 +205,5 @@ $ vault read atlas/roles/test
     roles                     n/a
     ttl                       2h0m0s
 ```
+
+ ~> **Notice:**  If you don't set the TTL and Max TTL when you are creating a role, the default lease will be established if it was previously configured in the `atlas/config/lease` path, but if it didn't set, the TTL will be set with 768h by default.
