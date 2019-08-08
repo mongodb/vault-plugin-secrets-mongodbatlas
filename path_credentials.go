@@ -46,17 +46,20 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 	}
 
 	// Get lease configuration
-	leaseConfig := &configLease{}
+	leaseConfig := &configLease{
+		TTL:    0,
+		MaxTTL: 0,
+	}
 
 	if cred.TTL > 0 {
 		leaseConfig.TTL = cred.TTL
-	} else {
+	} else if defaultLease != nil {
 		leaseConfig.TTL = defaultLease.TTL
 	}
 
 	if cred.MaxTTL > 0 {
 		leaseConfig.MaxTTL = cred.MaxTTL
-	} else {
+	} else if defaultLease != nil {
 		leaseConfig.MaxTTL = defaultLease.MaxTTL
 	}
 
