@@ -38,13 +38,13 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 
 func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry, lease *configLease) (*logical.Response, error) {
 
-	username := genUsername(displayName)
+	apiKeyDescription := genUsername(displayName)
 	client, err := b.clientMongo(ctx, s)
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
 	}
 	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walDatabaseUser{
-		UserName: username,
+		UserName: apiKeyDescription,
 	})
 	if err != nil {
 		return nil, errwrap.Wrapf("error writing WAL entry: {{err}}", err)
@@ -56,14 +56,21 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	case orgProgrammaticAPIKey:
 		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
 			&mongodbatlas.APIKeyInput{
-				Desc:  username,
+				Desc:  apiKeyDescription,
 				Roles: cred.ProgrammaticKeyRoles,
 			})
+		if err == nil {
+			err = addWhitelistEntry(client, cred.OrganizationID, key.ID, cred)
+		}
 	case projectProgrammaticAPIKey:
-		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID, &mongodbatlas.APIKeyInput{
-			Desc:  username,
-			Roles: cred.ProgrammaticKeyRoles,
-		})
+		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID,
+			&mongodbatlas.APIKeyInput{
+				Desc:  apiKeyDescription,
+				Roles: cred.ProgrammaticKeyRoles,
+			})
+		if err == nil {
+			err = addWhitelistEntry(client, key.Roles[0].OrgID, key.ID, cred)
+		}
 	}
 
 	if err != nil {
@@ -82,7 +89,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	resp := b.Secret(programmaticAPIKey).Response(map[string]interface{}{
 		"public_key":  key.PublicKey,
 		"private_key": key.PrivateKey,
-		"description": username,
+		"description": apiKeyDescription,
 	}, map[string]interface{}{
 		"programmaticapikeyid": key.ID,
 		"projectid":            cred.ProjectID,
@@ -94,6 +101,32 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	resp.Secret.MaxTTL = lease.MaxTTL
 
 	return resp, nil
+}
+
+func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
+	if len(cred.CIDRBlocks) > 0 {
+		cidrBlocks := make([]*mongodbatlas.WhitelistAPIKeysReq, len(cred.CIDRBlocks))
+		for i, cidrBlock := range cred.CIDRBlocks {
+			cidrBlocks[i].CidrBlock = cidrBlock
+		}
+		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, cidrBlocks)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(cred.IPAddresses) > 0 {
+		ipAddresses := make([]*mongodbatlas.WhitelistAPIKeysReq, len(cred.IPAddresses))
+		for i, ipAddress := range cred.IPAddresses {
+			ipAddresses[i].IPAddress = ipAddress
+		}
+		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, ipAddresses)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
