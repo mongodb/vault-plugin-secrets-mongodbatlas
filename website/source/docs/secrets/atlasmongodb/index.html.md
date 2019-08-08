@@ -139,15 +139,33 @@ $ vault write atlas/roles/test \
     project_id=5cf5a45a9ccf6400e60981b6 \
     programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY
 ```
-
+  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.atlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
+  
+You can attach one or more whitelist entries for the specific API Key as a follow:
 ```bash 
-$ vault write atlas/roles/test \
-    credential_type=project_programmatic_api_key \
-    project_id=5cf5a45a9ccf6400e60981b6 \
-    programmatic_key_roles=GROUP_CLUSTER_MANAGER
+  $ vault write atlas/roles/test \
+      credential_type=project_programmatic_api_key \
+      project_id=5cf5a45a9ccf6400e60981b6 \
+      programmatic_key_roles=GROUP_CLUSTER_MANAGER \
+      cidr_blocks=192.168.1.3/32 \
+      ip_addresses=192.168.1.3
 ```
 
-  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.atlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
+To verify you must run: 
+```bash 
+  $ vault read atlas/roles/test
+  
+    Key                       Value
+    ---                       -----
+    cidr_blocks               [192.168.1.3/32]
+    credential_type           project_programmatic_api_key
+    database_name             n/a
+    ip_addrersses             [192.168.1.3]
+    organization_id           n/a
+    programmatic_key_roles    [GROUP_CLUSTER_MANAGER]
+    project_id                5cf5a45a9ccf6400e60981b6
+    roles                     n/a
+```
 
    This creates a set of Programmatic API keys that is attached to an [Organization](https://docs.atlas.mongodb.com/configure-api-access/#view-the-details-of-an-api-key-in-an-organization), if `project_id` is used, is attached to a [Project](https://docs.atlas.mongodb.com/configure-api-access/#manage-programmatic-access-to-a-project).
 
@@ -194,6 +212,7 @@ $ vault read atlas/creds/test
 You can verify the role that you have created before with:
 ```bash
 $ vault read atlas/roles/test   
+
     Key                       Value
     ---                       -----
     credential_type           org_programmatic_api_key
