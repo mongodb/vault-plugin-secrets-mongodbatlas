@@ -141,6 +141,46 @@ func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
 	}
 }
 
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithIP(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	ips := []string{"192.168.1.1", "192.168.1.2"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"credential_type":        "org_programmatic_api_key",
+			"organization_id":        e.OrganizationID,
+			"programmatic_key_roles": roles,
+			"ip_addresses":           ips,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDR(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	cidrBlocks := []string{"0.0.0.0/0"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"credential_type":        "org_programmatic_api_key",
+			"organization_id":        e.OrganizationID,
+			"programmatic_key_roles": roles,
+			"cidr_blocks":            cidrBlocks,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
 func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectID(t *testing.T) {
 	roles := []string{"ORG_MEMBER"}
 	req := &logical.Request{
