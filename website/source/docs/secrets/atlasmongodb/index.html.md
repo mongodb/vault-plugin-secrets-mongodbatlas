@@ -162,7 +162,7 @@ To verify you must run:
     cidr_blocks               [192.168.1.3/32]
     credential_type           project_programmatic_api_key
     database_name             n/a
-    ip_addrersses             [192.168.1.3]
+    ip_addresses              [192.168.1.3]
     organization_id           n/a
     programmatic_key_roles    [GROUP_CLUSTER_MANAGER]
     project_id                5cf5a45a9ccf6400e60981b6
