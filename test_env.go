@@ -163,7 +163,7 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithIP(t *testing.T) {
 
 func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDR(t *testing.T) {
 	roles := []string{"ORG_MEMBER"}
-	cidrBlocks := []string{"0.0.0.0/0"}
+	cidrBlocks := []string{"179.154.224.2/32"}
 	req := &logical.Request{
 		Operation: logical.UpdateOperation,
 		Path:      "roles/test-programmatic-key",

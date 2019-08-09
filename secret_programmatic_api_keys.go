@@ -107,7 +107,9 @@ func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, 
 	if len(cred.CIDRBlocks) > 0 {
 		cidrBlocks := make([]*mongodbatlas.WhitelistAPIKeysReq, len(cred.CIDRBlocks))
 		for i, cidrBlock := range cred.CIDRBlocks {
-			cidrBlocks[i].CidrBlock = cidrBlock
+			cidrBlocks[i] = &mongodbatlas.WhitelistAPIKeysReq{
+				CidrBlock: cidrBlock,
+			}
 		}
 		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, cidrBlocks)
 		if err != nil {
@@ -118,7 +120,9 @@ func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, 
 	if len(cred.IPAddresses) > 0 {
 		ipAddresses := make([]*mongodbatlas.WhitelistAPIKeysReq, len(cred.IPAddresses))
 		for i, ipAddress := range cred.IPAddresses {
-			ipAddresses[i].IPAddress = ipAddress
+			ipAddresses[i] = &mongodbatlas.WhitelistAPIKeysReq{
+				IPAddress: ipAddress,
+			}
 		}
 		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, ipAddresses)
 		if err != nil {
