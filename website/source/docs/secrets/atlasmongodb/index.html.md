@@ -11,12 +11,15 @@ description: |-
 
 The MongoDB Atlas Secrets Engine generates Database User credentials and Programmatic API keys. 
 This allows one to manage the lifecycle of these MongoDB Atlas secrets programmatically. The 
-created MongoDB Atlas secrets are time-based and are automatically revoked when the Vault lease expires, unless renewed.
+created MongoDB Atlas secrets are time-based and are automatically revoked when the Vault lease 
+expires, unless renewed.
 
 This Secrets Engine supports two different types of MongoDB Atlas Secrets:
 
-1. `database_user`: Vault will create a database user for each lease, each user has a defined role(s) that provide appropriate access to the project’s databases. The username and password is returned to the caller. To see more about database users visit: https://docs.atlas.mongodb.com/reference/api/database-users/
-2. `programmatic_api_key`: Vault will call
+1. `database_user`: Vault will create a database user for each lease, each user has a defined 
+    role(s) that provide appropriate access to the project’s databases. The username and password 
+    is returned to the caller. To see more about database users  visit [databaseUsers](https://docs.atlas.mongodb.com/reference/api/database-users/)
+2. `programmatic_api_key`: Vault will call) 
    [apiKeys](https://docs.atlas.mongodb.com/reference/api/apiKeys-orgs-create-one/)
    and return the public key, secret key.
 
@@ -26,7 +29,8 @@ Most Secrets Engines must be configured in advance before they can perform their
 functions. These steps are usually completed by an operator or configuration
 management tool.
 
-  ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow the instructions in the [README developing section](./../../../../../README.md).
+  ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in 
+    progress. Until then follow the instructions in the [README developing section](./../../../../../README.md).
 
 
 1. Enable the MongoDB Atlas Secrets Engine:
@@ -41,13 +45,13 @@ management tool.
 
 1. It's necessary to generate and configure an API key for your organization for the acceptance test to succeed. To grant programmatic access to an organization or project using only the [API](https://docs.atlas.mongodb.com/api/) you need to know:
 
-    1. The programmatic API key has two parts: a Public Key and a Private Key. To see more details on how to create a programmatic API key visit https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys.
+    1. The programmatic API key has two parts: a Public Key and a Private Key. To see more details on how to create a programmatic API key visit [apiKeys](https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys).
     
-    1. The programmatic API key must be granted roles sufficient for the acceptance test to succeed. The Organization Owner and Project Owner roles should be sufficient. You can see the available roles at https://docs.atlas.mongodb.com/reference/user-roles.
+    1. The programmatic API key must be granted roles sufficient for the acceptance test to succeed. The Organization Owner and Project Owner roles should be sufficient. You can see the available roles at [userRoles](https://docs.atlas.mongodb.com/reference/user-roles).
 
     1. You must [configure Atlas API Access](https://docs.atlas.mongodb.com/configure-api-access/) for your programmatic API key. You should allow API access for the IP address from which the acceptance test runs.
 
-1. Later you must configure the MongoDB credentials/keys created in the previous step, which Vault will use to communicate with MongoDB Atlas:
+1. You must configure the MongoDB credentials/keys created in the previous step, which Vault will use to communicate with MongoDB Atlas:
 
     ```bash
     $ vault write mongodbatlas/config/root \
@@ -63,8 +67,9 @@ management tool.
     your MongoDB Atlas root account credentials. Instead generate a dedicated Programmatic API key with appropriate roles.
 
 ## Database Users
-Configure a Vault role that maps to a set of permissions in MongoDB Atlas as well as 
-a MongoDB Atlas credentials/keys. When users generate credentials, they are generated
+
+Configures a Vault role that maps to a set of permissions in MongoDB Atlas as well as 
+a MongoDB Atlas credentials/keys. When Vault generates credentials, they are generated
 against this role. An example:
 
 ```bash
@@ -79,12 +84,13 @@ $ vault write mongodbatlas/roles/test \
       }]
     EOF
 ```
-~> **Notice:** Each user has a set of roles that provide access to the project’s databases. A user’s roles apply to all the clusters in the project: if two clusters have a products database and a user has a role granting read access on the products database, the user has that access on both clusters.
 
 This creates a role named "my-role". When users generate credentials against
 this role, Vault will create a database user and attach the specified roles to that
 database user mapped to the appropriate database/collection. Vault will then create 
-a username and password for the database user and return these credentials.
+an username and password for the database user and return the credentials.
+
+~> **Notice:** Each `database_user` has a set of roles that provide access to the project’s databases. A `database_user` roles apply to all the clusters in the project: if two clusters have a products database and a user has a role granting read access on the products database, the user has that access on both clusters.
 
 ```bash
 $ vault read mongodbatlas/creds/test
@@ -105,29 +111,25 @@ For more information on database user roles, please see
 
   One may grant programmatic access to MongoDB Atlas by creating a Programmatic API key with access to a organization and project(s).
   Programmatic API Keys:
-  - Have two parts, a public key and a private key
+  - Has two parts, a public key and a private key
   - Cannot be used to log into Atlas through the user interface
   - Must be granted appropriate roles to complete required tasks
   - Must belong to one organization, but may be granted access to any number of projects in that organization.
-  - May have an IP whitelist configured and some capabilities may require a whitelist to be configured (these are noted in the MongoDB Atlas API documentation).
-
-
+  - May have an IP whitelist configured and some capabilities may require a whitelist to be configured (these are noted in the MongoDB Atlas API documentation: [whitelist](https://docs.atlas.mongodb.com/reference/api/apiKeys-org-whitelist-create/)).
 
   Most Secrets Engines must be configured in advance before they can perform their
   functions. These steps are usually completed by an operator or configuration
   management tool.
 
-
   ~> **Notice:** Even though the path above is `atlas/config/root`, do not use
   your MongoDB Atlas root account credentials. Instead generate a dedicated user or
   role.
 
-
 1. Create a Vault role for a Programmatic API key by mapping a Programmatic API key role(s) to a organization or project in MongoDB Atlas.
-- If the key/role is for the MongoDB Atlas Organization level use organization_id with the appropriate Id and roles
-- If the key/role is for the MongoDB Atlas Project level use project_id with the appropriate Id and roles
+- If the key/role is for the MongoDB Atlas Organization level use `organization_id` with the appropriate ID and roles
+- If the key/role is for the MongoDB Atlas Project level use `project_id` with the appropriate ID and roles
 
-~> **Notice:** Programmatic API keys can belong to only one Organization but can belong to one or more Projects. An examples:
+~> **Notice:** Programmatic API keys can belong to only one Organization but also can belong to a project. An examples:
 
 ```bash
 $ vault write mongodbatlas/roles/test \
@@ -141,7 +143,7 @@ $ vault write mongodbatlas/roles/test \
     project_id=5cf5a45a9ccf6400e60981b6 \
     programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY
 ```
-  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.mongodbatlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
+  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The former is created at the [Organization](https://docs.mongodbatlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The later creates an API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
   
 You can attach one or more whitelist entries for the specific API Key as a follow:
 ```bash 
@@ -186,8 +188,8 @@ To verify you must run:
 
 ## TTL and Max TTL
 
-
 Every role has a time-to-live (TTL) and maximum time-to-live (Max TTL) which is used to validate the TTL.  When a role expires and it's not renewed, the role is automatically revoked. You can set the TTL and Max TTL for each created role.
+
 ```bash 
 $ vault write mongodbatlas/roles/test \
     credential_type=project_programmatic_api_key \
@@ -198,6 +200,7 @@ $ vault write mongodbatlas/roles/test \
 ```
 
 This creates a role that is attached to an associated lease:
+
 ```bash
 $ vault read mongodbatlas/creds/test
 
@@ -212,6 +215,7 @@ $ vault read mongodbatlas/creds/test
 ```
 
 You can verify the role that you have created before with:
+
 ```bash
 $ vault read mongodbatlas/roles/test   
 
