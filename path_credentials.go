@@ -40,13 +40,31 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
 	}
 
-	// Get lease configuration(if any)
-	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)
+	defaultLease, err := b.LeaseConfig(ctx, req.Storage)
 	if err != nil {
 		return nil, err
 	}
-	if leaseConfig == nil {
-		leaseConfig = &configLease{}
+
+	// Get lease configuration
+	leaseConfig := &configLease{
+		TTL:    0,
+		MaxTTL: 0,
+	}
+
+	if cred.TTL > 0 {
+		leaseConfig.TTL = cred.TTL
+	} else if defaultLease != nil {
+		leaseConfig.TTL = defaultLease.TTL
+	}
+
+	if cred.MaxTTL > 0 {
+		leaseConfig.MaxTTL = cred.MaxTTL
+	} else if defaultLease != nil {
+		leaseConfig.MaxTTL = defaultLease.MaxTTL
+	}
+
+	if leaseConfig.TTL > leaseConfig.MaxTTL {
+		leaseConfig.TTL = leaseConfig.MaxTTL
 	}
 
 	switch cred.CredentialType {

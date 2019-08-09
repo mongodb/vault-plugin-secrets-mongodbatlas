@@ -38,4 +38,3 @@ func (b *Backend) pathRolesList(ctx context.Context, req *logical.Request, d *fr
 
 const pathRolesListHelpSyn = ``
 const pathRolesListHelpDesc = ``
-
