@@ -62,41 +62,43 @@ management tool.
     ~> **Notice:** Even though the path above is `mongodbatlas/config/root`, do not use
     your MongoDB Atlas root account credentials. Instead generate a dedicated Programmatic API key with appropriate roles.
 
-1. Configure a Vault role that maps to a set of permissions in MongoDB Atlas as well as 
-   a MongoDB Atlas credentials/keys. When users generate credentials, they are generated
-   against this role. An example:
+## Database Users
+Configure a Vault role that maps to a set of permissions in MongoDB Atlas as well as 
+a MongoDB Atlas credentials/keys. When users generate credentials, they are generated
+against this role. An example:
 
-    ```bash
-    $ vault write mongodbatlas/roles/test \
-        credential_type=database_user \
-        project_id=5cf5a481ok7f6400e60981b6 \
-        database_name=admin \
-        roles=-<<EOF
-          [{
-            "databaseName": "admin",
-            "roleName": "atlasAdmin"
-          }]
-        EOF
-    ```
+```bash
+$ vault write mongodbatlas/roles/test \
+    credential_type=database_user \
+    project_id=5cf5a481ok7f6400e60981b6 \
+    database_name=admin \
+    roles=-<<EOF
+      [{
+        "databaseName": "admin",
+        "roleName": "atlasAdmin"
+      }]
+    EOF
+```
+~> **Notice:** Each user has a set of roles that provide access to the project’s databases. A user’s roles apply to all the clusters in the project: if two clusters have a products database and a user has a role granting read access on the products database, the user has that access on both clusters.
 
-    This creates a role named "my-role". When users generate credentials against
-    this role, Vault will create a database user and attach the specified roles to that
-    database user mapped to the appropriate database/collection. Vault will then create 
-    a username and password for the database user and return these credentials.
+This creates a role named "my-role". When users generate credentials against
+this role, Vault will create a database user and attach the specified roles to that
+database user mapped to the appropriate database/collection. Vault will then create 
+a username and password for the database user and return these credentials.
 
-    ```bash
-    $ vault read mongodbatlas/creds/test
-        Key                Value
-        ---                -----
-        lease_id           mongodbatlas/creds/test/sZz3qvggwcULgERDqe9r151h
-        lease_duration     20s
-        lease_renewable    true
-        password           A3mOyxvSnBpKG5sdID2iNR
-        username           vault-test-1563475091-2081
-    ```
+```bash
+$ vault read mongodbatlas/creds/test
+    Key                Value
+    ---                -----
+    lease_id           mongodbatlas/creds/test/sZz3qvggwcULgERDqe9r151h
+    lease_duration     20s
+    lease_renewable    true
+    password           A3mOyxvSnBpKG5sdID2iNR
+    username           vault-test-1563475091-2081
+```
 
-    For more information on database user roles, please see
-    [step two of the setup section](#Setup).
+For more information on database user roles, please see
+[step two of the setup section](#Setup).
 
 ## Programmatic API Keys
 
@@ -128,18 +130,18 @@ management tool.
 ~> **Notice:** Programmatic API keys can belong to only one Organization but can belong to one or more Projects. An examples:
 
 ```bash
-$ vault write atlas/roles/test \
+$ vault write mongodbatlas/roles/test \
     credential_type=org_programmatic_api_key \
     organization_id=5b23ff2f96e82130d0aaec13 \
     programmatic_key_roles=ORG_MEMBER
 ```
 ```bash 
-$ vault write atlas/roles/test \
+$ vault write mongodbatlas/roles/test \
     credential_type=project_programmatic_api_key \
     project_id=5cf5a45a9ccf6400e60981b6 \
     programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY
 ```
-  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.atlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
+  ~> **Notice:**  The above examples creates two roles in Vault for Programmatic API keys. The first one is created at the [Organization](https://docs.mongodbatlas.mongodb.com/configure-api-access/) level with a role of ORG_MEMBER. The second example creates a Programmatic API key for the specified Project and grants access only GROUP_DATA_ACCESS_READ_ONLY.
   
 You can attach one or more whitelist entries for the specific API Key as a follow:
 ```bash 
@@ -170,11 +172,11 @@ To verify you must run:
    This creates a set of Programmatic API keys that is attached to an [Organization](https://docs.atlas.mongodb.com/configure-api-access/#view-the-details-of-an-api-key-in-an-organization), if `project_id` is used, is attached to a [Project](https://docs.atlas.mongodb.com/configure-api-access/#manage-programmatic-access-to-a-project).
 
   ```bash 
-    $ vault read atlas/creds/test
+    $ vault read mongodbatlas/creds/test
 
     Key                Value
     ---                -----
-    lease_id           atlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
+    lease_id           mongodbatlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
     lease_duration     20s
     lease_renewable    true
     description        vault-test-1563980947-1318
@@ -187,7 +189,7 @@ To verify you must run:
 
 Every role has a time-to-live (TTL) and maximum time-to-live (Max TTL) which is used to validate the TTL.  When a role expires and it's not renewed, the role is automatically revoked. You can set the TTL and Max TTL for each created role.
 ```bash 
-$ vault write atlas/roles/test \
+$ vault write mongodbatlas/roles/test \
     credential_type=project_programmatic_api_key \
     project_id=5cf5a45a9ccf6400e60981b6 \
     programmatic_key_roles=GROUP_DATA_ACCESS_READ_ONLY \
@@ -197,11 +199,11 @@ $ vault write atlas/roles/test \
 
 This creates a role that is attached to an associated lease:
 ```bash
-$ vault read atlas/creds/test
+$ vault read mongodbatlas/creds/test
 
     Key                Value
     ---                -----
-    lease_id           atlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
+    lease_id           mongodbatlas/creds/test/0fLBv1c2YDzPlJB1PwsRRKHR
     lease_duration     2h
     lease_renewable    true
     description        vault-test-1563980947-1318
@@ -211,7 +213,7 @@ $ vault read atlas/creds/test
 
 You can verify the role that you have created before with:
 ```bash
-$ vault read atlas/roles/test   
+$ vault read mongodbatlas/roles/test   
 
     Key                       Value
     ---                       -----
@@ -225,4 +227,4 @@ $ vault read atlas/roles/test
     ttl                       2h0m0s
 ```
 
- ~> **Notice:**  If you don't set the TTL and Max TTL when you are creating a role, the default lease will be established if it was previously configured in the `atlas/config/lease` path, but if it didn't set, the TTL will be set with 768h by default.
+ ~> **Notice:**  If you don't set the TTL and Max TTL when you are creating a role, the default lease will be established if it was previously configured in the `mongodbatlas/config/lease` path, but if it didn't set, the TTL will be set with 768h by default.
