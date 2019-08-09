@@ -114,8 +114,8 @@ For more information on database user roles, please see
   - Has two parts, a public key and a private key
   - Cannot be used to log into Atlas through the user interface
   - Must be granted appropriate roles to complete required tasks
-  - Must belong to one organization, but may be granted access to any number of projects in that organization.
-  - May have an IP whitelist configured and some capabilities may require a whitelist to be configured (these are noted in the MongoDB Atlas API documentation: [whitelist](https://docs.atlas.mongodb.com/reference/api/apiKeys-org-whitelist-create/)).
+  - Must belong to one organization, or can be granted access a project within that organization.
+  - Can be configured to have API whitelist capabilities (these are noted in the MongoDB Atlas API documentation: [whitelist](https://docs.atlas.mongodb.com/reference/api/apiKeys-org-whitelist-create/)).
 
   Most Secrets Engines must be configured in advance before they can perform their
   functions. These steps are usually completed by an operator or configuration
@@ -188,7 +188,7 @@ To verify you must run:
 
 ## TTL and Max TTL
 
-Every role has a time-to-live (TTL) and maximum time-to-live (Max TTL) which is used to validate the TTL.  When a role expires and it's not renewed, the role is automatically revoked. You can set the TTL and Max TTL for each created role.
+Each role can also have a time-to-live (TTL) and maximum time-to-live (Max TTL). When a credential expires and it's not renewed, it's automatically revoked. You can set the TTL and Max TTL for each role or globally using `config/lease`.
 
 ```bash 
 $ vault write mongodbatlas/roles/test \
@@ -199,7 +199,7 @@ $ vault write mongodbatlas/roles/test \
     max_ttl=5h
 ```
 
-This creates a role that is attached to an associated lease:
+This creates a credential that is attached to an associated lease:
 
 ```bash
 $ vault read mongodbatlas/creds/test
@@ -231,4 +231,4 @@ $ vault read mongodbatlas/roles/test
     ttl                       2h0m0s
 ```
 
- ~> **Notice:**  If you don't set the TTL and Max TTL when you are creating a role, the default lease will be established if it was previously configured in the `mongodbatlas/config/lease` path, but if it didn't set, the TTL will be set with 768h by default.
+ ~> **Notice:**  If you don't set the TTL and Max TTL when you are creating a role, the default lease will be established if it was previously configured in the `mongodbatlas/config/lease` path, but if it didn't set, the TTL will be set with using Vault's by default.
