@@ -54,7 +54,7 @@ func pathRoles(b *Backend) *framework.Path {
 				Description: fmt.Sprintf("Whitelist entry in CIDR notation to be added for the API key. Optional for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 		},
-		// Create for withelist
+
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.DeleteOperation: b.pathRolesDelete,
 			logical.ReadOperation:   b.pathRolesRead,
