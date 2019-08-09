@@ -9,6 +9,6 @@ require (
 	github.com/hashicorp/vault/api v1.0.2
 	github.com/hashicorp/vault/sdk v0.1.11
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/mongodb/go-client-mongodb-atlas v0.0.1
+	github.com/mongodb/go-client-mongodb-atlas v0.0.2
 	github.com/sethvargo/go-password v0.1.2
 )

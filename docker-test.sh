@@ -32,7 +32,6 @@ vault write sys/plugins/catalog/secret/vault-plugin-secrets-mongodbatlas \
     command="vault-plugin-secrets-mongodbatlas"
 
 vault secrets enable \
-    -path="atlas" \
+    -path="mongodbatlas" \
     -plugin-name="vault-plugin-secrets-mongodbatlas" plugin
 
-VAULT_TOKEN=  vault write atlas/credentials/test password="super-secret-password"

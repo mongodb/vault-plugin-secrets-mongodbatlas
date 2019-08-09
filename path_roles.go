@@ -46,6 +46,14 @@ func pathRoles(b *Backend) *framework.Path {
 				Type:        framework.TypeString,
 				Description: fmt.Sprintf("Organization ID for the credential, required for %s", orgProgrammaticAPIKey),
 			},
+			"ip_addresses": &framework.FieldSchema{
+				Type:        framework.TypeCommaStringSlice,
+				Description: fmt.Sprintf("IP address to be added to the whitelist for the API key. Optional for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+			},
+			"cidr_blocks": &framework.FieldSchema{
+				Type:        framework.TypeCommaStringSlice,
+				Description: fmt.Sprintf("Whitelist entry in CIDR notation to be added for the API key. Optional for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+			},
 			"ttl": {
 				Type:        framework.TypeDurationSecond,
 				Description: `Duration in seconds after which the issued token should expire. Defaults to 0, in which case the value will fallback to the system/mount defaults.`,
@@ -55,7 +63,7 @@ func pathRoles(b *Backend) *framework.Path {
 				Description: "The maximum allowed lifetime of tokens issued using this role.",
 			},
 		},
-		// Create for withelist
+
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.DeleteOperation: b.pathRolesDelete,
 			logical.ReadOperation:   b.pathRolesRead,
@@ -155,18 +163,24 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 			} else {
 				resp.AddWarning(fmt.Sprintf("organization_id required for %s", orgProgrammaticAPIKey))
 			}
+			if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
+				resp.AddWarning(fmt.Sprintf("%s", err))
+			}
 
 		case projectProgrammaticAPIKey:
 			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
 				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
 			} else {
-				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", orgProgrammaticAPIKey))
+				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", projectProgrammaticAPIKey))
 			}
 			if projectIDRaw, ok := d.GetOk("project_id"); ok {
 				projectID := projectIDRaw.(string)
 				credentialEntry.ProjectID = projectID
 			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s ", databaseUser))
+				resp.AddWarning(fmt.Sprintf("project_id required for %s ", projectProgrammaticAPIKey))
+			}
+			if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
+				resp.AddWarning(fmt.Sprintf("%s", err))
 			}
 
 		default:
@@ -192,6 +206,17 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 	}
 
 	return &resp, nil
+}
+
+func getAPIWhitelistArgs(credentialEntry *atlasCredentialEntry, d *framework.FieldData) error {
+
+	if cidrBlocks, ok := d.GetOk("cidr_blocks"); ok {
+		credentialEntry.CIDRBlocks = cidrBlocks.([]string)
+	}
+	if addresses, ok := d.GetOk("ip_addresses"); ok {
+		credentialEntry.IPAddresses = addresses.([]string)
+	}
+	return nil
 }
 
 func setAtlasCredential(ctx context.Context, s logical.Storage, credentialName string, credentialEntry *atlasCredentialEntry) error {
@@ -262,6 +287,8 @@ type atlasCredentialEntry struct {
 	Roles                string        `json:"roles"`
 	ProgrammaticKeyRoles []string      `json:"programmatic_key_roles"`
 	OrganizationID       string        `json:"organization_id"`
+	CIDRBlocks           []string      `json:"cidr_blocks"`
+	IPAddresses          []string      `json:"ip_addresses"`
 	TTL                  time.Duration `json:"ttl"`
 	MaxTTL               time.Duration `json:"max_ttl"`
 }
@@ -274,6 +301,8 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"roles":                  r.Roles,
 		"programmatic_key_roles": r.ProgrammaticKeyRoles,
 		"organization_id":        r.OrganizationID,
+		"cidr_blocks":            r.CIDRBlocks,
+		"ip_addresses":           r.IPAddresses,
 		"ttl":                    r.TTL.String(),
 		"max_ttl":                r.MaxTTL.String(),
 	}
