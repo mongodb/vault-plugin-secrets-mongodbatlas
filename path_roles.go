@@ -267,7 +267,7 @@ type atlasCredentialEntry struct {
 	ProgrammaticKeyRoles []string `json:"programmatic_key_roles"`
 	OrganizationID       string   `json:"organization_id"`
 	CIDRBlocks           []string `json:"cidr_blocks"`
-	IPAddresses          []string `json:"ip_adresses"`
+	IPAddresses          []string `json:"ip_addresses"`
 }
 
 func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
@@ -279,7 +279,7 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"programmatic_key_roles": r.ProgrammaticKeyRoles,
 		"organization_id":        r.OrganizationID,
 		"cidr_blocks":            r.CIDRBlocks,
-		"ip_addrersses":          r.IPAddresses,
+		"ip_addresses":           r.IPAddresses,
 	}
 	return respData
 }
