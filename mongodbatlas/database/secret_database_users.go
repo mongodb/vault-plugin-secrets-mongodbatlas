@@ -56,7 +56,7 @@ func (b *Backend) databaseUserRenew(ctx context.Context, req *logical.Request, d
 
 func (b *Backend) pathDatabaseUserRollback(ctx context.Context, req *logical.Request, _kind string, data interface{}) error {
 
-	var entry walDatabaseUser
+	var entry walEntry
 	if err := mapstructure.Decode(data, &entry); err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (b *Backend) databaseUserCreate(ctx context.Context, s logical.Storage, dis
 		return logical.ErrorResponse(err.Error()), nil
 	}
 
-	walID, err := framework.PutWAL(ctx, s, "database_user", &walDatabaseUser{
+	walID, err := framework.PutWAL(ctx, s, "database_user", &walEntry{
 		UserName: username,
 	})
 	if err != nil {

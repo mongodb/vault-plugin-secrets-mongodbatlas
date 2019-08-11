@@ -12,11 +12,10 @@ import (
 )
 
 const (
-	envVarRunAccTests    = "VAULT_ACC"
-	envVarPrivateKey     = "ATLAS_PRIVATE_KEY"
-	envVarPublicKey      = "ATLAS_PUBLIC_KEY"
-	envVarProjectID      = "ATLAS_PROJECT_ID"
-	envVarOrganizationID = "ATLAS_ORGANIZATION_ID"
+	envVarRunAccTests = "VAULT_ACC"
+	envVarPrivateKey  = "ATLAS_PRIVATE_KEY"
+	envVarPublicKey   = "ATLAS_PUBLIC_KEY"
+	envVarProjectID   = "ATLAS_PROJECT_ID"
 )
 
 var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
@@ -52,12 +51,11 @@ func newAcceptanceTestEnv() (*testEnv, error) {
 		return nil, err
 	}
 	return &testEnv{
-		PublicKey:      os.Getenv(envVarPublicKey),
-		PrivateKey:     os.Getenv(envVarPrivateKey),
-		ProjectID:      os.Getenv(envVarProjectID),
-		OrganizationID: os.Getenv(envVarOrganizationID),
-		Backend:        b,
-		Context:        ctx,
-		Storage:        &logical.InmemStorage{},
+		PublicKey:  os.Getenv(envVarPublicKey),
+		PrivateKey: os.Getenv(envVarPrivateKey),
+		ProjectID:  os.Getenv(envVarProjectID),
+		Backend:    b,
+		Context:    ctx,
+		Storage:    &logical.InmemStorage{},
 	}, nil
 }

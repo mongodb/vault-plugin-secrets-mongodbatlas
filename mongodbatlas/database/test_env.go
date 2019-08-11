@@ -8,10 +8,9 @@ import (
 )
 
 type testEnv struct {
-	PublicKey      string
-	PrivateKey     string
-	ProjectID      string
-	OrganizationID string
+	PublicKey  string
+	PrivateKey string
+	ProjectID  string
 
 	Backend logical.Backend
 	Context context.Context

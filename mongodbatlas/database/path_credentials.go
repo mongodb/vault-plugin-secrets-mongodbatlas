@@ -70,12 +70,11 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 	return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
 }
 
-type walDatabaseUser struct {
-	UserName             string
-	ProjectID            string
-	OrganizationID       string
-	ProgrammaticAPIKeyID string
-	CredentialType       string
+type walEntry struct {
+	UserName       string
+	ProjectID      string
+	OrganizationID string
+	CreentialType  string
 }
 
 func genUsername(displayName string) (ret string) {
