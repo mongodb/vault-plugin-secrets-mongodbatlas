@@ -1,4 +1,4 @@
-package atlas
+package programmatickeys
 
 import (
 	"context"
@@ -20,23 +20,6 @@ const (
 )
 
 var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
-
-func TestAcceptanceDatabaseUser(t *testing.T) {
-	if !runAcceptanceTests {
-		t.SkipNow()
-	}
-
-	acceptanceTestEnv, err := newAcceptanceTestEnv()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("add config", acceptanceTestEnv.AddConfig)
-	t.Run("add role", acceptanceTestEnv.AddRole)
-	t.Run("read database user creds", acceptanceTestEnv.ReadDatabaseUserCreds)
-	t.Run("renew database user creds", acceptanceTestEnv.RenewDatabaseUserCreds)
-	t.Run("revoke database user creds", acceptanceTestEnv.RevokeDatabaseUsersCreds)
-}
 
 func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
 	if !runAcceptanceTests {
@@ -72,23 +55,6 @@ func TestAcceptanceProgrammaticAPIKey_WithProjectID(t *testing.T) {
 	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
 	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
-}
-
-func TestAcceptanceDatabaseUser_WithCustomTTL(t *testing.T) {
-	if !runAcceptanceTests {
-		t.SkipNow()
-	}
-
-	acceptanceTestEnv, err := newAcceptanceTestEnv()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("add config", acceptanceTestEnv.AddConfig)
-	t.Run("add role with ttl", acceptanceTestEnv.AddRoleWithTTL)
-	t.Run("read database user creds", acceptanceTestEnv.ReadDatabaseUserCreds)
-	t.Run("renew database user creds", acceptanceTestEnv.RenewDatabaseUserCreds)
-	t.Run("revoke database user creds", acceptanceTestEnv.RevokeDatabaseUsersCreds)
 }
 
 func TestAcceptanceProgrammaticAPIKey_WithIPWhitelist(t *testing.T) {

@@ -1,4 +1,4 @@
-package atlas
+package programmatickeys
 
 import (
 	"context"
@@ -31,7 +31,7 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 			},
 		},
 
-		Renew:  b.databaseUserRenew,
+		Renew:  b.programmaticAPIKeysRenew,
 		Revoke: b.programmaticAPIKeyRevoke,
 	}
 }
@@ -43,7 +43,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
 	}
-	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walDatabaseUser{
+	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walEntry{
 		UserName: apiKeyDescription,
 	})
 	if err != nil {
@@ -57,7 +57,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
 			&mongodbatlas.APIKeyInput{
 				Desc:  apiKeyDescription,
-				Roles: cred.ProgrammaticKeyRoles,
+				Roles: cred.Roles,
 			})
 		if err == nil {
 			err = addWhitelistEntry(client, cred.OrganizationID, key.ID, cred)
@@ -66,7 +66,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID,
 			&mongodbatlas.APIKeyInput{
 				Desc:  apiKeyDescription,
-				Roles: cred.ProgrammaticKeyRoles,
+				Roles: cred.Roles,
 			})
 		if err == nil {
 			err = addWhitelistEntry(client, key.Roles[0].OrgID, key.ID, cred)
@@ -219,7 +219,7 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 
 func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logical.Request, _kind string, data interface{}) error {
 
-	var entry walDatabaseUser
+	var entry walEntry
 	if err := mapstructure.Decode(data, &entry); err != nil {
 		return err
 	}
@@ -262,4 +262,20 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 	}
 
 	return nil
+}
+
+func (b *Backend) programmaticAPIKeysRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+	// Get the lease (if any)
+	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+	if leaseConfig == nil {
+		leaseConfig = &configLease{}
+	}
+
+	resp := &logical.Response{Secret: req.Secret}
+	resp.Secret.TTL = leaseConfig.TTL
+	resp.Secret.MaxTTL = leaseConfig.MaxTTL
+	return resp, nil
 }

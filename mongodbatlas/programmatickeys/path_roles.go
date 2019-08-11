@@ -1,4 +1,4 @@
-package atlas
+package programmatickeys
 
 import (
 	"bytes"
@@ -24,23 +24,15 @@ func pathRoles(b *Backend) *framework.Path {
 
 			"credential_type": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Type of credential to retrieve. Must be one of %s, %s or %s", databaseUser, orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("Type of credential to retrieve. Must be one of %s or %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"project_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Project ID the credential belongs to, required for %s or %s", databaseUser, projectProgrammaticAPIKey),
-			},
-			"database_name": &framework.FieldSchema{
-				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Database name the credential belongs to, required for %s", databaseUser),
+				Description: fmt.Sprintf("Project ID the credential belongs to %s", projectProgrammaticAPIKey),
 			},
 			"roles": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Roles for the credential, required for %s", databaseUser),
-			},
-			"programmatic_key_roles": &framework.FieldSchema{
-				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("Roles for a programmatic API key, required for %s or %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("Roles for the credential, required for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"organization_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
@@ -114,7 +106,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 	if credentialTypeRaw, ok := d.GetOk("credential_type"); ok {
 		credentialType := credentialTypeRaw.(string)
-		allowedCredentialTypes := []string{databaseUser, orgProgrammaticAPIKey, projectProgrammaticAPIKey}
+		allowedCredentialTypes := []string{orgProgrammaticAPIKey, projectProgrammaticAPIKey}
 		if credentialType == "" {
 			return logical.ErrorResponse("emtpy credential_type"), nil
 		}
@@ -124,39 +116,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		credentialEntry.CredentialType = credentialType
 
 		switch credentialType {
-		case databaseUser:
-
-			if databaseNameRaw, ok := d.GetOk("database_name"); ok {
-				databaseName := databaseNameRaw.(string)
-				credentialEntry.DatabaseName = databaseName
-			} else {
-				resp.AddWarning(fmt.Sprintf("database_name required for %s", databaseUser))
-			}
-
-			if projectIDRaw, ok := d.GetOk("project_id"); ok {
-				projectID := projectIDRaw.(string)
-				credentialEntry.ProjectID = projectID
-			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s ", databaseUser))
-			}
-
-			if rolesRaw, ok := d.GetOk("roles"); ok {
-				compacted := rolesRaw.(string)
-				if len(compacted) > 0 {
-					compacted, err = compactJSON(rolesRaw.(string))
-					if err != nil {
-						return logical.ErrorResponse(fmt.Sprintf("cannot parse roles: %q", rolesRaw.(string))), nil
-					}
-				}
-				credentialEntry.Roles = compacted
-			}
-
 		case orgProgrammaticAPIKey:
-			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
-				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
-			} else {
-				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", orgProgrammaticAPIKey))
-			}
 			if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
 				organizatioID := organizatioIDRaw.(string)
 				credentialEntry.OrganizationID = organizatioID
@@ -168,11 +128,6 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 			}
 
 		case projectProgrammaticAPIKey:
-			if programmaticKeyRolesRaw, ok := d.GetOk("programmatic_key_roles"); ok {
-				credentialEntry.ProgrammaticKeyRoles = programmaticKeyRolesRaw.([]string)
-			} else {
-				resp.AddWarning(fmt.Sprintf("programmatic_key_roles required for %s", projectProgrammaticAPIKey))
-			}
 			if projectIDRaw, ok := d.GetOk("project_id"); ok {
 				projectID := projectIDRaw.(string)
 				credentialEntry.ProjectID = projectID
@@ -186,6 +141,12 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		default:
 			return logical.ErrorResponse("Unsupported credential_type %s", credentialType), nil
 		}
+	}
+
+	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
+		credentialEntry.Roles = programmaticKeyRolesRaw.([]string)
+	} else {
+		resp.AddWarning(fmt.Sprintf("roles required for %s", projectProgrammaticAPIKey))
 	}
 
 	if ttlRaw, ok := d.GetOk("ttl"); ok {
@@ -281,30 +242,28 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 }
 
 type atlasCredentialEntry struct {
-	CredentialType       string        `json:"credential_type"`
-	ProjectID            string        `json:"project_id"`
-	DatabaseName         string        `json:"database_name"`
-	Roles                string        `json:"roles"`
-	ProgrammaticKeyRoles []string      `json:"programmatic_key_roles"`
-	OrganizationID       string        `json:"organization_id"`
-	CIDRBlocks           []string      `json:"cidr_blocks"`
-	IPAddresses          []string      `json:"ip_addresses"`
-	TTL                  time.Duration `json:"ttl"`
-	MaxTTL               time.Duration `json:"max_ttl"`
+	CredentialType string        `json:"credential_type"`
+	ProjectID      string        `json:"project_id"`
+	DatabaseName   string        `json:"database_name"`
+	Roles          []string      `json:"roles"`
+	OrganizationID string        `json:"organization_id"`
+	CIDRBlocks     []string      `json:"cidr_blocks"`
+	IPAddresses    []string      `json:"ip_addresses"`
+	TTL            time.Duration `json:"ttl"`
+	MaxTTL         time.Duration `json:"max_ttl"`
 }
 
 func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 	respData := map[string]interface{}{
-		"credential_type":        r.CredentialType,
-		"project_id":             r.ProjectID,
-		"database_name":          r.DatabaseName,
-		"roles":                  r.Roles,
-		"programmatic_key_roles": r.ProgrammaticKeyRoles,
-		"organization_id":        r.OrganizationID,
-		"cidr_blocks":            r.CIDRBlocks,
-		"ip_addresses":           r.IPAddresses,
-		"ttl":                    r.TTL.String(),
-		"max_ttl":                r.MaxTTL.String(),
+		"credential_type": r.CredentialType,
+		"project_id":      r.ProjectID,
+		"database_name":   r.DatabaseName,
+		"roles":           r.Roles,
+		"organization_id": r.OrganizationID,
+		"cidr_blocks":     r.CIDRBlocks,
+		"ip_addresses":    r.IPAddresses,
+		"ttl":             r.TTL.String(),
+		"max_ttl":         r.MaxTTL.String(),
 	}
 	return respData
 }
@@ -317,7 +276,6 @@ func compactJSON(input string) (string, error) {
 
 const pathRolesHelpSyn = ``
 const pathRolesHelpDesc = ``
-const databaseUser = `database_user`
 const orgProgrammaticAPIKey = `org_programmatic_api_key`
 const projectProgrammaticAPIKey = `project_programmatic_api_key`
 const programmaticAPIKey = `programmatic_api_key`

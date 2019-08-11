@@ -1,4 +1,4 @@
-package atlas
+package programmatickeys
 
 import (
 	"context"
@@ -45,7 +45,6 @@ func NewBackend() *Backend {
 		},
 
 		Secrets: []*framework.Secret{
-			databaseUsers(&b),
 			programmaticAPIKeys(&b),
 		},
 

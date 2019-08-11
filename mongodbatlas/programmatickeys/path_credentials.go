@@ -1,4 +1,4 @@
-package atlas
+package programmatickeys
 
 import (
 	"context"
@@ -67,17 +67,11 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 		leaseConfig.TTL = leaseConfig.MaxTTL
 	}
 
-	switch cred.CredentialType {
-	case databaseUser:
-		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
-	case orgProgrammaticAPIKey, projectProgrammaticAPIKey:
-		return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
-	}
+	return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
 
-	return nil, nil
 }
 
-type walDatabaseUser struct {
+type walEntry struct {
 	UserName             string
 	ProjectID            string
 	OrganizationID       string
