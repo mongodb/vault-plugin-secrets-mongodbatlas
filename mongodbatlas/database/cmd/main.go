@@ -1,13 +1,12 @@
 package main
 
 import (
+	"log"
 	"os"
 
-	atlas "github.com/mongodb/vault-plugin-secrets-mongodbatlas/mongodbatlas/database"
+	"github.com/mongodb/vault-plugin-secrets-mongodbatlas/mongodbatlas/database"
 
-	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
-	"github.com/hashicorp/vault/sdk/plugin"
 )
 
 func main() {
@@ -15,16 +14,9 @@ func main() {
 	flags := apiClientMeta.FlagSet()
 	flags.Parse(os.Args[1:])
 
-	tlsConfig := apiClientMeta.GetTLSConfig()
-	tlsProviderFunc := api.VaultPluginTLSProvider(tlsConfig)
-
-	if err := plugin.Serve(&plugin.ServeOpts{
-		BackendFactoryFunc: atlas.Factory,
-		TLSProviderFunc:    tlsProviderFunc,
-	}); err != nil {
-		logger := hclog.New(&hclog.LoggerOptions{})
-
-		logger.Error("plugin shutting down", "error", err)
+	err := database.Run(apiClientMeta.GetTLSConfig())
+	if err != nil {
+		log.Println(err)
 		os.Exit(1)
 	}
 }
