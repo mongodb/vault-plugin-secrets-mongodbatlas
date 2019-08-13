@@ -19,7 +19,6 @@ func pathRoles(b *Backend) *framework.Path {
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,
 				Description: "Name of the Credentials",
-				DisplayName: "Credential Name",
 			},
 
 			"credential_type": &framework.FieldSchema{

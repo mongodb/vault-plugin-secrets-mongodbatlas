@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	atlas "github.com/mongodb/vault-plugin-secrets-mongodbatlas/mongodbatlas/programmatickeys"
+	atlas "github.com/mongodb/vault-plugin-secrets-mongodbatlas/plugins/programmatickeys"
 
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
