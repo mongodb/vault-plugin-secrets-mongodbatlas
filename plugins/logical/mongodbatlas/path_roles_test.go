@@ -1,4 +1,4 @@
-package programmatickeys
+package mongodbatlas
 
 import (
 	"context"
