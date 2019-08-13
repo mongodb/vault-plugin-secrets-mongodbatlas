@@ -1,4 +1,4 @@
-package database
+package mongodbatlas
 
 import (
 	"context"

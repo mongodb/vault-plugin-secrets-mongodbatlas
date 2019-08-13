@@ -1,4 +1,4 @@
-package database
+package mongodbatlas
 
 import "github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 
