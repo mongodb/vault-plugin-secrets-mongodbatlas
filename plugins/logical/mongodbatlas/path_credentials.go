@@ -91,5 +91,12 @@ func normalizeDisplayName(displayName string) string {
 
 }
 
-const pathCredentialsHelpSyn = ``
-const pathCredentialsHelpDesc = ``
+const pathCredentialsHelpSyn = `
+Generate MongoDB Atlas Programmatic API from a specific Vault role.
+`
+const pathCredentialsHelpDesc = `
+This path reads generates MongoDB Atlas Programmatic API Keys for
+a particular role. Atlas Programmatic API Keys will be
+generated on demand and will be automatically revoked when
+the lease is up.
+`
