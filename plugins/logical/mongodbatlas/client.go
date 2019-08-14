@@ -1,6 +1,5 @@
 package mongodbatlas
 
-
 import (
 	"context"
 	"errors"
