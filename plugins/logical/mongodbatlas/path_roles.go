@@ -263,8 +263,33 @@ func compactJSON(input string) (string, error) {
 	return compacted.String(), err
 }
 
-const pathRolesHelpSyn = ``
-const pathRolesHelpDesc = ``
+const pathRolesHelpSyn = `
+Manage the roles used to generate MongoDB Atlas Programmatic API Keys.
+
+`
+const pathRolesHelpDesc = `
+This path lets you manage the roles used to generate MongoDB Atlas Programmatic API Keys
+
+The "project_id" parameter specifies a project where the Programmatic API Key will be
+created.
+
+"organization_id" parameter specifies in which Organization the key will be created.
+
+If both are specified, the key will be created with the "organization_id" and then
+assigned to the Project with the provided "project_id"
+
+The "roles" parameter specifies the MongoDB Atlas roles that should be assigned
+to Programmatic API keys created for a given role. At least one should be provided
+and must be valid for the organization.
+
+"ip_addresses" and "cidr_blocks" are used to add whitelist entries for the API key.
+
+"project_roles" is used when both "organization_id" and "project_id" are supplied. 
+And it's a list of roles that the API Key should be granted. A minimum of one role 
+must be provided. Any roles provided must be valid for the assigned Project
+
+To validate the keys, attempt to read an access key after writing the policy.
+`
 const orgProgrammaticAPIKey = `organization`
 const projectProgrammaticAPIKey = `project`
 const programmaticAPIKey = `programmatic_api_key`
