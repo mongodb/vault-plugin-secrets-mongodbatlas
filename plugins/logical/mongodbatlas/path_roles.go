@@ -26,6 +26,7 @@ func pathRoles(b *Backend) *framework.Path {
 			"roles": &framework.FieldSchema{
 				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("List of roles that the API Key should be granted. A minimum of one role must be provided. Any roles provided must be valid for the assigned Project, required for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Required:    true,
 			},
 			"organization_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
