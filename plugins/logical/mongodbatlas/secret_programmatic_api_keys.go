@@ -2,7 +2,6 @@ package mongodbatlas
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -47,7 +46,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	}
 
 	var key *mongodbatlas.APIKey
-	var orgID string
+	var orgIDs []string
 
 	switch {
 	case isOrgKey(cred.OrganizationID, cred.ProjectID):
@@ -56,15 +55,18 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 				Desc:  apiKeyDescription,
 				Roles: cred.Roles,
 			})
-		orgID = cred.OrganizationID
+		orgIDs = []string{cred.OrganizationID}
 	case isProjectKey(cred.OrganizationID, cred.ProjectID):
 		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID,
 			&mongodbatlas.APIKeyInput{
 				Desc:  apiKeyDescription,
 				Roles: cred.Roles,
 			})
-
-		orgID = key.Roles[0].OrgID
+		for _, role := range key.Roles {
+			if len(role.OrgID) > 0 {
+				orgIDs = append(orgIDs, role.OrgID)
+			}
+		}
 	case isAssignedToProject(cred.OrganizationID, cred.ProjectID):
 		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
 			&mongodbatlas.APIKeyInput{
@@ -77,11 +79,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 			break
 		}
 
-		c, _ := json.Marshal(&mongodbatlas.AssignAPIKey{
-			Roles: cred.ProjectRoles,
-		})
-		b.logger.Debug(string(c))
-		orgID = cred.OrganizationID
+		orgIDs = []string{cred.OrganizationID}
 		_, err = client.ProjectAPIKeys.Assign(context.Background(), cred.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
 			Roles: cred.ProjectRoles,
 		})
@@ -89,7 +87,12 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 
 	// if there is no error, add whitelist entry
 	if err == nil {
-		err = addWhitelistEntry(client, orgID, key.ID, cred)
+		for _, orgID := range orgIDs {
+			err = addWhitelistEntry(client, orgID, key.ID, cred)
+			if err != nil {
+				break
+			}
+		}
 	}
 
 	if err != nil {
