@@ -46,9 +46,9 @@ func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type":        "org_programmatic_api_key",
-			"organization_id":        e.OrganizationID,
-			"programmatic_key_roles": roles,
+			"credential_type": "org_programmatic_api_key",
+			"organization_id": e.OrganizationID,
+			"roles":           roles,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -65,10 +65,10 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithIP(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type":        "org_programmatic_api_key",
-			"organization_id":        e.OrganizationID,
-			"programmatic_key_roles": roles,
-			"ip_addresses":           ips,
+			"credential_type": "org_programmatic_api_key",
+			"organization_id": e.OrganizationID,
+			"roles":           roles,
+			"ip_addresses":    ips,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -85,10 +85,10 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDR(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type":        "org_programmatic_api_key",
-			"organization_id":        e.OrganizationID,
-			"programmatic_key_roles": roles,
-			"cidr_blocks":            cidrBlocks,
+			"credential_type": "org_programmatic_api_key",
+			"organization_id": e.OrganizationID,
+			"roles":           roles,
+			"cidr_blocks":     cidrBlocks,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -104,9 +104,9 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectID(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type":        "project_programmatic_api_key",
-			"programmatic_key_roles": roles,
-			"project_id":             e.ProjectID,
+			"credential_type": "project_programmatic_api_key",
+			"roles":           roles,
+			"project_id":      e.ProjectID,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)

@@ -30,7 +30,7 @@ func pathRoles(b *Backend) *framework.Path {
 				Description: fmt.Sprintf("Project ID the credential belongs to %s", projectProgrammaticAPIKey),
 			},
 			"roles": &framework.FieldSchema{
-				Type:        framework.TypeString,
+				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("Roles for the credential, required for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"organization_id": &framework.FieldSchema{

@@ -25,12 +25,7 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 				Type:        framework.TypeString,
 				Description: "Programmatic API Key Private Key",
 			},
-			"security_token": &framework.FieldSchema{
-				Type:        framework.TypeString,
-				Description: "Security Token",
-			},
 		},
-
 		Renew:  b.programmaticAPIKeysRenew,
 		Revoke: b.programmaticAPIKeyRevoke,
 	}

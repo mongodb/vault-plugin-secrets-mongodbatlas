@@ -20,7 +20,7 @@ func TestBackend_PathListCredentials(t *testing.T) {
 	}
 
 	credData := map[string]interface{}{
-		"credential_type": "database_user",
+		"credential_type": "org_programmatic_api_key",
 	}
 
 	credReq := &logical.Request{
