@@ -108,7 +108,7 @@ func (m *MongoDBAtlas) CreateUser(ctx context.Context, statements dbplugin.State
 		Roles:        databaseUser.Roles,
 	}
 
-	_, _, err = client.DatabaseUsers.Create(ctx, databaseUser.ProjectID, databaseUserRequest)
+	_, _, err = client.DatabaseUsers.Create(ctx, m.ProjectID, databaseUserRequest)
 	if err != nil {
 		return "", "", err
 	}
@@ -134,33 +134,7 @@ func (m *MongoDBAtlas) RevokeUser(ctx context.Context, statements dbplugin.State
 		return err
 	}
 
-	var revocationStatement string
-	switch len(statements.Revocation) {
-	case 0:
-		// we need the ProjectID, so we we will get it from the create
-		revocationStatement = statements.Creation[0]
-	case 1:
-		revocationStatement = statements.Revocation[0]
-	default:
-		return fmt.Errorf("expected 0 or 1 revocation statements, got %d", len(statements.Revocation))
-	}
-
-	// Unmarshal revocation statements into mongodbRoles
-	var databaseUser mongoDBAtlasStatement
-	err = json.Unmarshal([]byte(revocationStatement), &databaseUser)
-	if err != nil {
-		return err
-	}
-
-	db := databaseUser.DatabaseName
-	// If db is not specified, use the default authenticationDatabase "admin"
-	if db == "" {
-		db = "admin"
-	}
-
-	projectID := databaseUser.ProjectID
-
-	_, err = client.DatabaseUsers.Delete(ctx, projectID, username)
+	_, err = client.DatabaseUsers.Delete(ctx, m.ProjectID, username)
 	return err
 }
 
@@ -189,19 +163,11 @@ func (m *MongoDBAtlas) SetCredentials(ctx context.Context, statements dbplugin.S
 	username = staticUser.Username
 	password = staticUser.Password
 
-	// Since we need the project ID from the creatin statement
-	// we will fetch it
-	var databaseUser mongoDBAtlasStatement
-	err = json.Unmarshal([]byte(statements.Creation[0]), &databaseUser)
-	if err != nil {
-		return "", "", err
-	}
-
 	databaseUserRequest := &mongodbatlas.DatabaseUser{
 		Password: password,
 	}
 
-	_, _, err = client.DatabaseUsers.Update(context.Background(), databaseUser.ProjectID, username, databaseUserRequest)
+	_, _, err = client.DatabaseUsers.Update(context.Background(), m.ProjectID, username, databaseUserRequest)
 	if err != nil {
 		return "", "", err
 	}

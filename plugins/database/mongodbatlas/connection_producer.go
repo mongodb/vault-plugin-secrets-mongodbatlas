@@ -14,6 +14,7 @@ import (
 type mongoDBAtlasConnectionProducer struct {
 	PublicKey  string `json:"public_key" structs:"public_key" mapstructure:"public_key"`
 	PrivateKey string `json:"private_key" structs:"private_key" mapstructure:"private_key"`
+	ProjectID  string `json:"project_id" structs:"project_id" mapstructure:"project_id"`
 
 	Initialized bool
 	RawConfig   map[string]interface{}

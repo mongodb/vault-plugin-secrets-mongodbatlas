@@ -2,7 +2,6 @@ package mongodbatlas
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -12,7 +11,7 @@ import (
 	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
-const testMongoDBAtlasRole = `{"project_id": "%s", "roles": [{"databaseName":"admin","roleName":"atlasAdmin"}]}`
+const testMongoDBAtlasRole = `{"roles": [{"databaseName":"admin","roleName":"atlasAdmin"}]}`
 
 func TestMongoDBAtlas_Initialize(t *testing.T) {
 	connectionDetails := map[string]interface{}{
@@ -35,9 +34,12 @@ func TestMongoDBAtlas_CreateUser(t *testing.T) {
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
+	projectID := os.Getenv("ATLAS_PROJECT_ID")
+
 	connectionDetails := map[string]interface{}{
 		"public_key":  publicKey,
 		"private_key": privateKey,
+		"project_id":  projectID,
 	}
 
 	db := new()
@@ -46,13 +48,8 @@ func TestMongoDBAtlas_CreateUser(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	projectID := os.Getenv("ATLAS_PROJECT_ID")
-	if len(projectID) == 0 {
-		t.Fatal("ATLAS_PROJECT_ID not set")
-	}
-
 	statements := dbplugin.Statements{
-		Creation: []string{fmt.Sprintf(testMongoDBAtlasRole, projectID)},
+		Creation: []string{testMongoDBAtlasRole},
 	}
 
 	usernameConfig := dbplugin.UsernameConfig{
@@ -79,9 +76,12 @@ func TestMongoDBAtlas_RevokeUser(t *testing.T) {
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
+	projectID := os.Getenv("ATLAS_PROJECT_ID")
+
 	connectionDetails := map[string]interface{}{
 		"public_key":  publicKey,
 		"private_key": privateKey,
+		"project_id":  projectID,
 	}
 
 	db := new()
@@ -90,13 +90,8 @@ func TestMongoDBAtlas_RevokeUser(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	projectID := os.Getenv("ATLAS_PROJECT_ID")
-	if len(projectID) == 0 {
-		t.Fatal("ATLAS_PROJECT_ID not set")
-	}
-
 	statements := dbplugin.Statements{
-		Creation: []string{fmt.Sprintf(testMongoDBAtlasRole, projectID)},
+		Creation: []string{testMongoDBAtlasRole},
 	}
 
 	usernameConfig := dbplugin.UsernameConfig{
@@ -120,20 +115,18 @@ func TestMongoDB_SetCredentials(t *testing.T) {
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
+	projectID := os.Getenv("ATLAS_PROJECT_ID")
+
 	connectionDetails := map[string]interface{}{
 		"public_key":  publicKey,
 		"private_key": privateKey,
+		"project_id":  projectID,
 	}
 
 	db := new()
 	_, err := db.Init(context.Background(), connectionDetails, true)
 	if err != nil {
 		t.Fatalf("err: %s", err)
-	}
-
-	projectID := os.Getenv("ATLAS_PROJECT_ID")
-	if len(projectID) == 0 {
-		t.Fatal("ATLAS_PROJECT_ID not set")
 	}
 
 	// create the database user in advance, and test the connection
@@ -156,7 +149,7 @@ func TestMongoDB_SetCredentials(t *testing.T) {
 	}
 
 	statements := dbplugin.Statements{
-		Creation: []string{fmt.Sprintf(testMongoDBAtlasRole, projectID)},
+		Creation: []string{testMongoDBAtlasRole},
 	}
 
 	username, password, err := db.SetCredentials(context.Background(), statements, usernameConfig)
