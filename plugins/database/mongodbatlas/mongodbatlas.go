@@ -89,7 +89,7 @@ func (m *MongoDBAtlas) CreateUser(ctx context.Context, statements dbplugin.State
 	var databaseUser mongoDBAtlasStatement
 	err = json.Unmarshal([]byte(statements.Creation[0]), &databaseUser)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("Error unmarshalling statement %s", err)
 	}
 
 	// Default to "admin" if no db provided
