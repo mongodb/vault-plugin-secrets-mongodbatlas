@@ -21,6 +21,8 @@ func TestBackend_PathListCredentials(t *testing.T) {
 
 	credData := map[string]interface{}{
 		"credential_type": "org_programmatic_api_key",
+		"organization_id": "aspergues",
+		"roles":           []string{"me", "domine"},
 	}
 
 	credReq := &logical.Request{

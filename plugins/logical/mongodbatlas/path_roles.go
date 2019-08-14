@@ -115,6 +115,10 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		credentialEntry.ProjectID = projectID
 	}
 
+	if len(credentialEntry.OrganizationID) == 0 && len(credentialEntry.ProjectID) == 0 {
+		return logical.ErrorResponse("organization_id or project_id are required"), nil
+	}
+
 	if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
 		resp.AddWarning(fmt.Sprintf("%s", err))
 	}
@@ -122,14 +126,14 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
 		credentialEntry.Roles = programmaticKeyRolesRaw.([]string)
 	} else {
-		resp.AddWarning(fmt.Sprintf("%s is required for %s and %s keys", "roles", orgProgrammaticAPIKey, projectProgrammaticAPIKey))
+		return logical.ErrorResponse(fmt.Sprintf("%s is required for %s and %s keys", "roles", orgProgrammaticAPIKey, projectProgrammaticAPIKey)), nil
 	}
 
 	if projectRolesRaw, ok := d.GetOk("project_roles"); ok {
 		credentialEntry.ProjectRoles = projectRolesRaw.([]string)
 	} else {
 		if isAssignedToProject(credentialEntry.OrganizationID, credentialEntry.ProjectID) {
-			resp.AddWarning(fmt.Sprintf("%s is required if both %s and %s are supplied", "roles", "organization_id", "project_id"))
+			return logical.ErrorResponse(fmt.Sprintf("%s is required if both %s and %s are supplied", "roles", "organization_id", "project_id")), nil
 		}
 	}
 
