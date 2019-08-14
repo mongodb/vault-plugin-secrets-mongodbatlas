@@ -13,8 +13,7 @@ require (
 	github.com/hashicorp/vault/api v1.0.5-0.20190805220215-b4347d553834
 	github.com/hashicorp/vault/sdk v0.1.14-0.20190805214312-16112a336457
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/mongodb/go-client-mongodb-atlas v0.0.2
-	github.com/sethvargo/go-password v0.1.2
+	github.com/mongodb/go-client-mongodb-atlas v0.0.3
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
 	golang.org/x/sys v0.0.0-20190523142557-0e01d883c5c5 // indirect
 	golang.org/x/text v0.3.2 // indirect
