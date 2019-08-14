@@ -121,10 +121,16 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
 		credentialEntry.Roles = programmaticKeyRolesRaw.([]string)
+	} else {
+		resp.AddWarning(fmt.Sprintf("%s is required for %s and %s keys", "roles", orgProgrammaticAPIKey, projectProgrammaticAPIKey))
 	}
 
 	if projectRolesRaw, ok := d.GetOk("project_roles"); ok {
 		credentialEntry.ProjectRoles = projectRolesRaw.([]string)
+	} else {
+		if isAssignedToProject(credentialEntry.OrganizationID, credentialEntry.ProjectID) {
+			resp.AddWarning(fmt.Sprintf("%s is required if both %s and %s are supplied", "roles", "organization_id", "project_id"))
+		}
 	}
 
 	if ttlRaw, ok := d.GetOk("ttl"); ok {
