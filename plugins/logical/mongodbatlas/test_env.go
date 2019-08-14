@@ -46,9 +46,28 @@ func (e *testEnv) AddProgrammaticAPIKeyRole(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type": "org_programmatic_api_key",
 			"organization_id": e.OrganizationID,
 			"roles":           roles,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectIDAndOrgID(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	projectRoles := []string{"GROUP_READ_ONLY"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"organization_id": e.OrganizationID,
+			"project_id":      e.ProjectID,
+			"roles":           roles,
+			"project_roles":   projectRoles,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -65,7 +84,6 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithIP(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type": "org_programmatic_api_key",
 			"organization_id": e.OrganizationID,
 			"roles":           roles,
 			"ip_addresses":    ips,
@@ -85,7 +103,6 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDR(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type": "org_programmatic_api_key",
 			"organization_id": e.OrganizationID,
 			"roles":           roles,
 			"cidr_blocks":     cidrBlocks,
@@ -104,9 +121,8 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectID(t *testing.T) {
 		Path:      "roles/test-programmatic-key",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
-			"credential_type": "project_programmatic_api_key",
-			"roles":           roles,
-			"project_id":      e.ProjectID,
+			"roles":      roles,
+			"project_id": e.ProjectID,
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)

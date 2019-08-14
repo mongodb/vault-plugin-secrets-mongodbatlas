@@ -1,6 +1,5 @@
 package mongodbatlas
 
-
 import (
 	"context"
 	"time"
@@ -50,7 +49,7 @@ func (b *Backend) pathConfigLeaseWrite(ctx context.Context, req *logical.Request
 }
 
 func (b *Backend) pathConfigLeaseRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	leaseConfig, err := b.LeaseConfig(ctx, req.Storage)
+	leaseConfig, err := b.leaseConfig(ctx, req.Storage)
 
 	if err != nil {
 		return nil, err

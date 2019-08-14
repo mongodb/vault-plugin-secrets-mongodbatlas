@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/vault/sdk/framework"
-	"github.com/hashicorp/vault/sdk/helper/strutil"
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
@@ -18,32 +17,31 @@ func pathRoles(b *Backend) *framework.Path {
 		Fields: map[string]*framework.FieldSchema{
 			"name": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: "Name of the Credentials",
-			},
-
-			"credential_type": &framework.FieldSchema{
-				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Type of credential to retrieve. Must be one of %s or %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: "Name of the Roles",
 			},
 			"project_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Project ID the credential belongs to %s", projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("Project ID the %s API key belongs to.", projectProgrammaticAPIKey),
 			},
 			"roles": &framework.FieldSchema{
 				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("Roles for the credential, required for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("List of roles that the API Key should be granted. A minimum of one role must be provided. Any roles provided must be valid for the assigned Project, required for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"organization_id": &framework.FieldSchema{
 				Type:        framework.TypeString,
-				Description: fmt.Sprintf("Organization ID for the credential, required for %s", orgProgrammaticAPIKey),
+				Description: fmt.Sprintf("Organization ID required for an %s API key", orgProgrammaticAPIKey),
 			},
 			"ip_addresses": &framework.FieldSchema{
 				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("IP address to be added to the whitelist for the API key. Optional for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("IP address to be added to the whitelist for the API key. Optional for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"cidr_blocks": &framework.FieldSchema{
 				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("Whitelist entry in CIDR notation to be added for the API key. Optional for %s and %s", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("Whitelist entry in CIDR notation to be added for the API key. Optional for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+			},
+			"project_roles": &framework.FieldSchema{
+				Type:        framework.TypeCommaStringSlice,
+				Description: fmt.Sprintf("Roles assigned when an %s API Key is assiged to a %s API key", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"ttl": {
 				Type:        framework.TypeDurationSecond,
@@ -103,49 +101,30 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		credentialEntry = &atlasCredentialEntry{}
 	}
 
-	if credentialTypeRaw, ok := d.GetOk("credential_type"); ok {
-		credentialType := credentialTypeRaw.(string)
-		allowedCredentialTypes := []string{orgProgrammaticAPIKey, projectProgrammaticAPIKey}
-		if credentialType == "" {
-			return logical.ErrorResponse("emtpy credential_type"), nil
-		}
-		if !strutil.StrListContains(allowedCredentialTypes, credentialType) {
-			return logical.ErrorResponse(fmt.Sprintf("unrecognized credential_type %q, not one of %#v", credentialType, allowedCredentialTypes)), nil
-		}
-		credentialEntry.CredentialType = credentialType
+	if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
+		organizatioID := organizatioIDRaw.(string)
+		credentialEntry.OrganizationID = organizatioID
+	}
 
-		switch credentialType {
-		case orgProgrammaticAPIKey:
-			if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
-				organizatioID := organizatioIDRaw.(string)
-				credentialEntry.OrganizationID = organizatioID
-			} else {
-				resp.AddWarning(fmt.Sprintf("organization_id required for %s", orgProgrammaticAPIKey))
-			}
-			if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
-				resp.AddWarning(fmt.Sprintf("%s", err))
-			}
+	if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
+		resp.AddWarning(fmt.Sprintf("%s", err))
+	}
 
-		case projectProgrammaticAPIKey:
-			if projectIDRaw, ok := d.GetOk("project_id"); ok {
-				projectID := projectIDRaw.(string)
-				credentialEntry.ProjectID = projectID
-			} else {
-				resp.AddWarning(fmt.Sprintf("project_id required for %s ", projectProgrammaticAPIKey))
-			}
-			if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
-				resp.AddWarning(fmt.Sprintf("%s", err))
-			}
+	if projectIDRaw, ok := d.GetOk("project_id"); ok {
+		projectID := projectIDRaw.(string)
+		credentialEntry.ProjectID = projectID
+	}
 
-		default:
-			return logical.ErrorResponse("Unsupported credential_type %s", credentialType), nil
-		}
+	if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
+		resp.AddWarning(fmt.Sprintf("%s", err))
 	}
 
 	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
 		credentialEntry.Roles = programmaticKeyRolesRaw.([]string)
-	} else {
-		resp.AddWarning(fmt.Sprintf("roles required for %s", projectProgrammaticAPIKey))
+	}
+
+	if projectRolesRaw, ok := d.GetOk("project_roles"); ok {
+		credentialEntry.ProjectRoles = projectRolesRaw.([]string)
 	}
 
 	if ttlRaw, ok := d.GetOk("ttl"); ok {
@@ -241,26 +220,26 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 }
 
 type atlasCredentialEntry struct {
-	CredentialType string        `json:"credential_type"`
 	ProjectID      string        `json:"project_id"`
 	DatabaseName   string        `json:"database_name"`
 	Roles          []string      `json:"roles"`
 	OrganizationID string        `json:"organization_id"`
 	CIDRBlocks     []string      `json:"cidr_blocks"`
 	IPAddresses    []string      `json:"ip_addresses"`
+	ProjectRoles   []string      `json:"project_roles"`
 	TTL            time.Duration `json:"ttl"`
 	MaxTTL         time.Duration `json:"max_ttl"`
 }
 
 func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 	respData := map[string]interface{}{
-		"credential_type": r.CredentialType,
 		"project_id":      r.ProjectID,
 		"database_name":   r.DatabaseName,
 		"roles":           r.Roles,
 		"organization_id": r.OrganizationID,
 		"cidr_blocks":     r.CIDRBlocks,
 		"ip_addresses":    r.IPAddresses,
+		"project_roles":   r.ProjectRoles,
 		"ttl":             r.TTL.String(),
 		"max_ttl":         r.MaxTTL.String(),
 	}
@@ -275,6 +254,6 @@ func compactJSON(input string) (string, error) {
 
 const pathRolesHelpSyn = ``
 const pathRolesHelpDesc = ``
-const orgProgrammaticAPIKey = `org_programmatic_api_key`
-const projectProgrammaticAPIKey = `project_programmatic_api_key`
+const orgProgrammaticAPIKey = `organization`
+const projectProgrammaticAPIKey = `project`
 const programmaticAPIKey = `programmatic_api_key`

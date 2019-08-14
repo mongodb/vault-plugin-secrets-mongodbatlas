@@ -40,7 +40,7 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
 	}
 
-	defaultLease, err := b.LeaseConfig(ctx, req.Storage)
+	defaultLease, err := b.leaseConfig(ctx, req.Storage)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,6 @@ type walEntry struct {
 	ProjectID            string
 	OrganizationID       string
 	ProgrammaticAPIKeyID string
-	CredentialType       string
 }
 
 func genUsername(displayName string) (ret string) {

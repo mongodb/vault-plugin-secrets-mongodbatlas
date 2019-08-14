@@ -77,7 +77,7 @@ func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) erro
 }
 
 // LeaseConfig returns the lease configuration
-func (b *Backend) LeaseConfig(ctx context.Context, s logical.Storage) (*configLease, error) {
+func (b *Backend) leaseConfig(ctx context.Context, s logical.Storage) (*configLease, error) {
 	entry, err := s.Get(ctx, "config/lease")
 	if err != nil {
 		return nil, err
