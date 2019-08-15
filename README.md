@@ -13,7 +13,7 @@ directly via [security@mongodb.com](mailto:security@mongodb.com) or [open a tick
 ## Quick Links
 - [Vault Website](https://www.vaultproject.io)
 - [MongoDB Atlas Website](https://www.mongodb.com/cloud/atlas)
-- [Atlas MongoDB Secrets Docs](https://www.vaultproject.io/docs/secrets/atlasmongodb/index.html)
+- [Atlas MongoDB Secrets Docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
 - [Vault Github](https://www.github.com/hashicorp/vault)
 - [General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
 - [Discussion List](https://groups.google.com/forum/#!forum/vault-tool)
@@ -56,11 +56,14 @@ Clone this repository:
 mkdir $GOPATH/src/github.com/hashicorp/vault-plugin-secrets-mongodbatlas`
 cd $GOPATH/src/github.com/hashicorp/
 git clone git@github.com:mongodb/vault-plugin-secrets-mongodbatlas.git
+go mod download
 
 ```
 (or use `go get github.com/mongodb/vault-plugin-secrets-mongodbatlas` ).
 
-You can then download any required build tools by bootstrapping your environment:
+Then you can go to each of the directories of the `database` and `secrets`
+backends on the `plugins/database/mongodbatlas/` and `plugins/logical/mongodbatlas/`
+respectively and download any of the required tools to bootstrap your environment:
 
 ```sh
 $ make bootstrap
@@ -94,6 +97,10 @@ $ vault server -config=path/to/config.json ...
 
 Once the server is started, register the plugin in the Vault server's [plugin catalog](https://www.vaultproject.io/docs/internals/plugins.html#plugin-catalog):
 
+#### Atlas MongoDB Programmatic API Keys plugin
+
+To register the Atlas MongoDB Programmatic API Keys plugin run the following:
+
 ```sh
 $ vault write sys/plugins/catalog/mongodbatlassecrets \
         sha_256="$(shasum -a 256 path/to/plugin/directory/vault-plugin-secrets-mongodbatlas | cut -d " " -f1)" \
@@ -109,6 +116,26 @@ $ vault secrets enable --plugin-name='mongodbatlas' --path="mongodbatlas" plugin
 
 ```
 
+#### Atlas MongoDB Database plugin
+
+The following steps are required to register the Atlas MongoDB Database plugin:
+
+```sh
+
+vault write sys/plugins/catalog/database/mongodbatlas-database-plugin \
+    sha256=$(shasum -a 256 mongodbatlas-database-plugin | cut -d' ' -f1) \
+    command="mongodbatlas-database-plugin"
+
+```
+
+Then, you must enable the Vault's Database plugin with Vault
+
+```sh
+
+vault secrets enable database
+
+```
+
 ### Tests
 
 This plugin has both integration tests, and acceptance tests. 
@@ -117,9 +144,10 @@ The integration tests are run by `$ make test` and rather than firing real
 API calls, they fire API calls at a local test server that returns expected
 responses.
 
-The acceptance tests fire real API calls, and are located in `acceptance_test.go`.
-These should be run once as a final step before placing a PR. Please see 
-`acceptance_test.go` to learn the environment variables that will need to be set.
+The acceptance tests fire real API calls, and are located in `plugins/logical/mongodbatlas/acceptance_test.go`
+and `plugins/database/mongodbatlas/mongodbatlas_test.go`. These should be run 
+once as a final step before placing a PR. Please see `acceptance_test.go` and 
+`mongodbatlas_test.go` to learn the environment variables that will need to be set.
 
 **Warning:** The acceptance tests create/destroy/modify *real resources*,
 which may incur real costs in some cases. In the presence of a bug,
@@ -130,7 +158,10 @@ account for whatever backend you're testing.
 
 To run the acceptance tests, you need exporting the following environment variables:
 
-
+- VAULT_ACC - Set to `1` to run the acceptance tests
+- ATLAS_ORGANIZATION_ID - An organization ID
+- ATLAS_PUBLIC_KEY and ATLAS_PRIVATE_KEY - A public and Private key with the correct permissions to run the tests
+- ATLAS_PROJECT_ID - A Project ID
 
 To run the acceptance tests, after exporting the necessary environment variables, 
 from the home directory run `go test`:
