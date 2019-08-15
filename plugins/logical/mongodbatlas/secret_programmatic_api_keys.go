@@ -46,53 +46,14 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	}
 
 	var key *mongodbatlas.APIKey
-	var orgIDs []string
 
 	switch {
 	case isOrgKey(cred.OrganizationID, cred.ProjectID):
-		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
-			&mongodbatlas.APIKeyInput{
-				Desc:  apiKeyDescription,
-				Roles: cred.Roles,
-			})
-		orgIDs = []string{cred.OrganizationID}
+		key, err = createOrgKey(client, apiKeyDescription, cred)
 	case isProjectKey(cred.OrganizationID, cred.ProjectID):
-		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID,
-			&mongodbatlas.APIKeyInput{
-				Desc:  apiKeyDescription,
-				Roles: cred.Roles,
-			})
-		for _, role := range key.Roles {
-			if len(role.OrgID) > 0 {
-				orgIDs = append(orgIDs, role.OrgID)
-			}
-		}
+		key, err = createProjectAPIKey(client, apiKeyDescription, cred)
 	case isAssignedToProject(cred.OrganizationID, cred.ProjectID):
-		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
-			&mongodbatlas.APIKeyInput{
-				Desc:  apiKeyDescription,
-				Roles: cred.Roles,
-			})
-
-		// if there is an error creating the key, just break and go to the WAL delete
-		if err != nil {
-			break
-		}
-
-		orgIDs = []string{cred.OrganizationID}
-		_, err = client.ProjectAPIKeys.Assign(context.Background(), cred.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
-			Roles: cred.ProjectRoles,
-		})
-	}
-
-	// if there is no error, add whitelist entry
-	if err == nil {
-		for _, orgID := range orgIDs {
-			err = addWhitelistEntry(client, orgID, key.ID, cred)
-			if err != nil {
-				break
-			}
-		}
+		key, err = createAndAssigKey(client, apiKeyDescription, cred)
 	}
 
 	if err != nil {
@@ -122,6 +83,59 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	resp.Secret.MaxTTL = lease.MaxTTL
 
 	return resp, nil
+}
+
+func createOrgKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.APIKeys.Create(context.Background(), credentialEntry.OrganizationID,
+		&mongodbatlas.APIKeyInput{
+			Desc:  apiKeyDescription,
+			Roles: credentialEntry.Roles,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	err = addWhitelistEntry(client, credentialEntry.OrganizationID, key.ID, credentialEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}
+
+func createProjectAPIKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.ProjectAPIKeys.Create(context.Background(), credentialEntry.ProjectID,
+		&mongodbatlas.APIKeyInput{
+			Desc:  apiKeyDescription,
+			Roles: credentialEntry.Roles,
+		})
+	if err != nil {
+		return nil, err
+	}
+	var orgIDs []string
+	for _, role := range key.Roles {
+		if len(role.OrgID) > 0 {
+			orgIDs = append(orgIDs, role.OrgID)
+		}
+	}
+
+	return key, nil
+}
+
+func createAndAssigKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, err := createOrgKey(client, apiKeyDescription, credentialEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = client.ProjectAPIKeys.Assign(context.Background(), credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
+		Roles: credentialEntry.ProjectRoles,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
 }
 
 func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
