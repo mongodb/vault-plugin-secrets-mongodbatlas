@@ -276,11 +276,11 @@ created.
 "organization_id" parameter specifies in which Organization the key will be created.
 
 If both are specified, the key will be created with the "organization_id" and then
-assigned to the Project with the provided "project_id"
+assigned to the Project with the provided "project_id".
 
-The "roles" parameter specifies the MongoDB Atlas roles that should be assigned
-to Programmatic API keys created for a given role. At least one should be provided
-and must be valid for the organization.
+The "roles" parameter specifies the MongoDB Atlas Programmatic Key roles that should be assigned
+to the Programmatic API keys created for a given role. At least one role should be provided
+and must be valid for key level (project or org).
 
 "ip_addresses" and "cidr_blocks" are used to add whitelist entries for the API key.
 
