@@ -1,4 +1,4 @@
-package atlas
+package mongodbatlas
 
 import (
 	"context"
@@ -40,7 +40,7 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
 	}
 
-	defaultLease, err := b.LeaseConfig(ctx, req.Storage)
+	defaultLease, err := b.leaseConfig(ctx, req.Storage)
 	if err != nil {
 		return nil, err
 	}
@@ -67,22 +67,15 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 		leaseConfig.TTL = leaseConfig.MaxTTL
 	}
 
-	switch cred.CredentialType {
-	case databaseUser:
-		return b.databaseUserCreate(ctx, req.Storage, userName, cred, leaseConfig)
-	case orgProgrammaticAPIKey, projectProgrammaticAPIKey:
-		return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
-	}
+	return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred, leaseConfig)
 
-	return nil, nil
 }
 
-type walDatabaseUser struct {
+type walEntry struct {
 	UserName             string
 	ProjectID            string
 	OrganizationID       string
 	ProgrammaticAPIKeyID string
-	CredentialType       string
 }
 
 func genUsername(displayName string) (ret string) {
@@ -98,5 +91,12 @@ func normalizeDisplayName(displayName string) string {
 
 }
 
-const pathCredentialsHelpSyn = ``
-const pathCredentialsHelpDesc = ``
+const pathCredentialsHelpSyn = `
+Generate MongoDB Atlas Programmatic API from a specific Vault role.
+`
+const pathCredentialsHelpDesc = `
+This path reads generates MongoDB Atlas Programmatic API Keys for
+a particular role. Atlas Programmatic API Keys will be
+generated on demand and will be automatically revoked when
+the lease is up.
+`

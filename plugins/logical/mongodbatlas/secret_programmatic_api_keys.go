@@ -1,4 +1,4 @@
-package atlas
+package mongodbatlas
 
 import (
 	"context"
@@ -25,13 +25,8 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 				Type:        framework.TypeString,
 				Description: "Programmatic API Key Private Key",
 			},
-			"security_token": &framework.FieldSchema{
-				Type:        framework.TypeString,
-				Description: "Security Token",
-			},
 		},
-
-		Renew:  b.databaseUserRenew,
+		Renew:  b.programmaticAPIKeysRenew,
 		Revoke: b.programmaticAPIKeyRevoke,
 	}
 }
@@ -43,7 +38,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
 	}
-	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walDatabaseUser{
+	walID, err := framework.PutWAL(ctx, s, programmaticAPIKey, &walEntry{
 		UserName: apiKeyDescription,
 	})
 	if err != nil {
@@ -52,25 +47,13 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 
 	var key *mongodbatlas.APIKey
 
-	switch cred.CredentialType {
-	case orgProgrammaticAPIKey:
-		key, _, err = client.APIKeys.Create(context.Background(), cred.OrganizationID,
-			&mongodbatlas.APIKeyInput{
-				Desc:  apiKeyDescription,
-				Roles: cred.ProgrammaticKeyRoles,
-			})
-		if err == nil {
-			err = addWhitelistEntry(client, cred.OrganizationID, key.ID, cred)
-		}
-	case projectProgrammaticAPIKey:
-		key, _, err = client.ProjectAPIKeys.Create(context.Background(), cred.ProjectID,
-			&mongodbatlas.APIKeyInput{
-				Desc:  apiKeyDescription,
-				Roles: cred.ProgrammaticKeyRoles,
-			})
-		if err == nil {
-			err = addWhitelistEntry(client, key.Roles[0].OrgID, key.ID, cred)
-		}
+	switch {
+	case isOrgKey(cred.OrganizationID, cred.ProjectID):
+		key, err = createOrgKey(client, apiKeyDescription, cred)
+	case isProjectKey(cred.OrganizationID, cred.ProjectID):
+		key, err = createProjectAPIKey(client, apiKeyDescription, cred)
+	case isAssignedToProject(cred.OrganizationID, cred.ProjectID):
+		key, err = createAndAssigKey(client, apiKeyDescription, cred)
 	}
 
 	if err != nil {
@@ -94,13 +77,65 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		"programmaticapikeyid": key.ID,
 		"projectid":            cred.ProjectID,
 		"organizationid":       cred.OrganizationID,
-		"credentialtype":       cred.CredentialType,
 	})
 
 	resp.Secret.TTL = lease.TTL
 	resp.Secret.MaxTTL = lease.MaxTTL
 
 	return resp, nil
+}
+
+func createOrgKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.APIKeys.Create(context.Background(), credentialEntry.OrganizationID,
+		&mongodbatlas.APIKeyInput{
+			Desc:  apiKeyDescription,
+			Roles: credentialEntry.Roles,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	err = addWhitelistEntry(client, credentialEntry.OrganizationID, key.ID, credentialEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}
+
+func createProjectAPIKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.ProjectAPIKeys.Create(context.Background(), credentialEntry.ProjectID,
+		&mongodbatlas.APIKeyInput{
+			Desc:  apiKeyDescription,
+			Roles: credentialEntry.Roles,
+		})
+	if err != nil {
+		return nil, err
+	}
+	var orgIDs []string
+	for _, role := range key.Roles {
+		if len(role.OrgID) > 0 {
+			orgIDs = append(orgIDs, role.OrgID)
+		}
+	}
+
+	return key, nil
+}
+
+func createAndAssigKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, err := createOrgKey(client, apiKeyDescription, credentialEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = client.ProjectAPIKeys.Assign(context.Background(), credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
+		Roles: credentialEntry.ProjectRoles,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
 }
 
 func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
@@ -144,71 +179,31 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	if !ok {
 		return nil, fmt.Errorf("secret is missing programmatic api key id internal data")
 	}
-	credentialTypeRaw, ok := req.Secret.InternalData["credentialtype"]
-	if !ok {
-		return nil, fmt.Errorf("secret is missing credential type internal data")
-	}
 
-	credentialType, ok := credentialTypeRaw.(string)
-	if !ok {
-		return nil, fmt.Errorf("secret is missing credential type internal internal data")
-	}
-
-	var organizationID string
-	var projectID string
-	var data map[string]interface{}
-
-	switch credentialType {
-	case orgProgrammaticAPIKey:
-		organizationIDRaw, ok := req.Secret.InternalData["organizationid"]
-		if !ok {
-			return nil, fmt.Errorf("secret is missing organization id internal data")
-		}
-
+	organizationID := ""
+	organizationIDRaw, ok := req.Secret.InternalData["organizationid"]
+	if ok {
 		organizationID, ok = organizationIDRaw.(string)
 		if !ok {
 			return nil, fmt.Errorf("secret is missing organization id internal data")
 		}
+	}
 
-		data = map[string]interface{}{
-			"organizationid":       organizationID,
-			"programmaticapikeyid": programmaticAPIKeyID,
-			"credentialtype":       credentialType,
-		}
-
-	case programmaticAPIKeyID:
-		projectIDRaw, ok := req.Secret.InternalData["projectid"]
-		if !ok {
-			return nil, fmt.Errorf("secret is missing project id internal data")
-		}
-
+	projectID := ""
+	projectIDRaw, ok := req.Secret.InternalData["projectid"]
+	if ok {
 		projectID, ok = projectIDRaw.(string)
 		if !ok {
-			return nil, fmt.Errorf("secret is missing project id internal data")
-		}
-
-		data = map[string]interface{}{
-			"projectid":            projectID,
-			"programmaticapikeyid": programmaticAPIKeyID,
-			"credentialtype":       credentialType,
-		}
-	case programmaticAPIKeyID:
-		projectIDRaw, ok := req.Secret.InternalData["projectid"]
-		if !ok {
-			return nil, fmt.Errorf("secret is missing project id internal data")
-		}
-
-		projectID, ok = projectIDRaw.(string)
-		if !ok {
-			return nil, fmt.Errorf("secret is missing project id internal data")
-		}
-
-		data = map[string]interface{}{
-			"projectid":            projectID,
-			"programmaticapikeyid": programmaticAPIKeyID,
-			"credentialtype":       credentialType,
+			return nil, fmt.Errorf("secret is missing project_id internal data")
 		}
 	}
+
+	var data = map[string]interface{}{
+		"organizationid":       organizationID,
+		"programmaticapikeyid": programmaticAPIKeyID,
+		"projectid":            projectID,
+	}
+
 	// Use the user rollback mechanism to delete this database_user
 	err := b.pathProgrammaticAPIKeyRollback(ctx, req, programmaticAPIKey, data)
 	if err != nil {
@@ -219,7 +214,7 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 
 func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logical.Request, _kind string, data interface{}) error {
 
-	var entry walDatabaseUser
+	var entry walEntry
 	if err := mapstructure.Decode(data, &entry); err != nil {
 		return err
 	}
@@ -230,8 +225,8 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		return nil
 	}
 
-	switch entry.CredentialType {
-	case orgProgrammaticAPIKey:
+	switch {
+	case isOrgKey(entry.OrganizationID, entry.ProjectID):
 		// check if the user exists or not
 		_, res, err := client.APIKeys.Get(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		// if the user is gone, move along
@@ -250,7 +245,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 			}
 			return err
 		}
-	case projectProgrammaticAPIKey:
+	case isProjectKey(entry.OrganizationID, entry.ProjectID):
 		// now, delete the user
 		res, err := client.ProjectAPIKeys.Unassign(context.Background(), entry.ProjectID, entry.ProgrammaticAPIKeyID)
 		if err != nil {
@@ -259,7 +254,43 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 			}
 			return err
 		}
+	case isAssignedToProject(entry.OrganizationID, entry.ProjectID):
+		// check if the user exists or not
+		_, res, err := client.APIKeys.Get(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		// if the user is gone, move along
+		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return err
+		}
+
+		// now, delete the api key
+		res, err = client.APIKeys.Delete(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
+			return err
+		}
+
 	}
 
 	return nil
+}
+
+func (b *Backend) programmaticAPIKeysRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+	// Get the lease (if any)
+	leaseConfig, err := b.leaseConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+	if leaseConfig == nil {
+		leaseConfig = &configLease{}
+	}
+
+	resp := &logical.Response{Secret: req.Secret}
+	resp.Secret.TTL = leaseConfig.TTL
+	resp.Secret.MaxTTL = leaseConfig.MaxTTL
+	return resp, nil
 }

@@ -1,4 +1,4 @@
-package atlas
+package mongodbatlas
 
 import (
 	"context"
@@ -20,23 +20,6 @@ const (
 )
 
 var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
-
-func TestAcceptanceDatabaseUser(t *testing.T) {
-	if !runAcceptanceTests {
-		t.SkipNow()
-	}
-
-	acceptanceTestEnv, err := newAcceptanceTestEnv()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("add config", acceptanceTestEnv.AddConfig)
-	t.Run("add role", acceptanceTestEnv.AddRole)
-	t.Run("read database user creds", acceptanceTestEnv.ReadDatabaseUserCreds)
-	t.Run("renew database user creds", acceptanceTestEnv.RenewDatabaseUserCreds)
-	t.Run("revoke database user creds", acceptanceTestEnv.RevokeDatabaseUsersCreds)
-}
 
 func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
 	if !runAcceptanceTests {
@@ -74,7 +57,7 @@ func TestAcceptanceProgrammaticAPIKey_WithProjectID(t *testing.T) {
 
 }
 
-func TestAcceptanceDatabaseUser_WithCustomTTL(t *testing.T) {
+func TestAcceptanceProgrammaticAPIKey_ProjectWithIPWhitelist(t *testing.T) {
 	if !runAcceptanceTests {
 		t.SkipNow()
 	}
@@ -85,10 +68,11 @@ func TestAcceptanceDatabaseUser_WithCustomTTL(t *testing.T) {
 	}
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
-	t.Run("add role with ttl", acceptanceTestEnv.AddRoleWithTTL)
-	t.Run("read database user creds", acceptanceTestEnv.ReadDatabaseUserCreds)
-	t.Run("renew database user creds", acceptanceTestEnv.RenewDatabaseUserCreds)
-	t.Run("revoke database user creds", acceptanceTestEnv.RevokeDatabaseUsersCreds)
+	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleProjectWithIP)
+	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+
 }
 
 func TestAcceptanceProgrammaticAPIKey_WithIPWhitelist(t *testing.T) {
@@ -121,6 +105,24 @@ func TestAcceptanceProgrammaticAPIKey_WithCIDRWhitelist(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithCIDR)
+	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+
+}
+
+func TestAcceptanceProgrammaticAPIKey_AssignToProject(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
+
+	acceptanceTestEnv, err := newAcceptanceTestEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("add config", acceptanceTestEnv.AddConfig)
+	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithProjectIDAndOrgID)
 	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
 	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
 	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)

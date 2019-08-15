@@ -2,7 +2,10 @@
 
 set -ex
 
-GOOS=linux go build cmd/atlas/main.go 
+GOOS=linux go build plugins/database/mongodbatlas/mongodbatlas-database-plugin/main.go 
+mv main mongodbatlas-database-plugin
+
+GOOS=linux go build plugins/logical/mongodbatlas/cmd/mongodbatlas/main.go 
 mv main vault-plugin-secrets-mongodbatlas
 
 docker kill vaultplg 2>/dev/null || true
@@ -35,3 +38,8 @@ vault secrets enable \
     -path="mongodbatlas" \
     -plugin-name="vault-plugin-secrets-mongodbatlas" plugin
 
+vault write sys/plugins/catalog/database/mongodbatlas-database-plugin \
+    sha256=$(shasum -a 256 mongodbatlas-database-plugin | cut -d' ' -f1) \
+    command="mongodbatlas-database-plugin"
+
+vault secrets enable database

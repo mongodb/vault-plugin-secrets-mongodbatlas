@@ -1,8 +1,7 @@
-package atlas
+package mongodbatlas
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -27,10 +26,6 @@ func (b *Backend) pathRolesList(ctx context.Context, req *logical.Request, d *fr
 	entries, err := req.Storage.List(ctx, "roles/")
 	if err != nil {
 		return nil, err
-	}
-
-	if b.logger.IsDebug() {
-		b.logger.Debug(fmt.Sprintf("Entries %+v", entries))
 	}
 
 	return logical.ListResponse(entries), nil
