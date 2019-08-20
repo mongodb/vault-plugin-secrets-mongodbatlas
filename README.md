@@ -162,10 +162,10 @@ Before running the acceptance tests export the following environment variables:
 - ATLAS_PROJECT_ID - Your Project ID
 
 To run the acceptance tests, after exporting the necessary environment variables,
-from the home directory run `go test`:
+from the home directory run `VAULT_ACC=1 make test`:
 
 ```sh
-$ go test
+$ VAULT_ACC=1 make test
 ```
 
 ## Other Docs
