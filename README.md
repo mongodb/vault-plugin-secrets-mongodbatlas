@@ -1,6 +1,6 @@
 # Vault Plugin: MongoDB Atlas Secrets Engine
 
-This is a Secrets engine to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
+This is a Secrets Engine to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
 This plugin generates unique, ephemeral datababase user credentials and programmatic API keys.
 
 **Please note**: Hashicorp takes Vault's security and their users' trust very seriously, as does MongoDB.
@@ -16,7 +16,7 @@ directly via [security@mongodb.com](mailto:security@mongodb.com) or [open a tick
 - [MongoDB Atlas Secrets Docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
 - [Vault Github](https://www.github.com/hashicorp/vault)
 - [General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
-- [Discussion List](https://groups.google.com/forum/#!forum/vault-tool)
+- [Vault Discussion List](https://groups.google.com/forum/#!forum/vault-tool)
 
 
 ## Usage
@@ -61,9 +61,7 @@ go mod download
 ```
 (or use `go get github.com/mongodb/vault-plugin-secrets-mongodbatlas` ).
 
-Then you can go to each of the directories of the `database` and `secrets`
-backends on the `plugins/database/mongodbatlas/` and `plugins/logical/mongodbatlas/`
-respectively and download any of the required tools to bootstrap your environment:
+Then you can download any of the required tools to bootstrap your environment:
 
 ```sh
 $ make bootstrap
@@ -97,19 +95,19 @@ $ vault server -config=path/to/config.json ...
 
 Once the server is started, register the plugin in the Vault server's [plugin catalog](https://www.vaultproject.io/docs/internals/plugins.html#plugin-catalog):
 
-#### MongoDB Atlas Programmatic API Keys plugin
+#### MongoDB Atlas Secrets Backend
 
-To register the MongoDB Atlas Programmatic API Keys plugin run the following:
+To register the MongoDB Atlas Secrets Backend run the following:
 
 ```sh
-$ vault write sys/plugins/catalog/mongodbatlassecrets \
+$ vault write sys/plugins/catalog/vault-plugin-secrets-mongodbatlas \
         sha_256="$(shasum -a 256 path/to/plugin/directory/vault-plugin-secrets-mongodbatlas | cut -d " " -f1)" \
         command="vault-plugin-secrets-mongodbatlas"
 ```
 
 Any name can be substituted for the plugin name "mongodbatlas". This
 name will be referenced in the next step, where we enable the secrets
-plugin backend using the AliCloud secrets plugin:
+plugin backend using the MongoDB Atlas Secrets Backend:
 
 ```sh
 $ vault secrets enable --plugin-name='mongodbatlas' --path="mongodbatlas" plugin
@@ -159,7 +157,7 @@ account for whatever backend you're testing.
 Before running the acceptance tests export the following environment variables:
 
 - VAULT_ACC - Set to `1` to run the acceptance tests
-- ATLAS_ORGANIZATION_ID - An Organization ID
+- ATLAS_ORGANIZATION_ID - An organization ID
 - ATLAS_PUBLIC_KEY and ATLAS_PRIVATE_KEY - A public and Private key with the correct permissions to run the tests
 - ATLAS_PROJECT_ID - A Project ID
 
