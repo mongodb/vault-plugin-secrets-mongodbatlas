@@ -126,7 +126,7 @@ vault write sys/plugins/catalog/database/mongodbatlas-database-plugin \
 
 ```
 
-Then, you must enable the Vault's Database plugin with Vault
+Then, you must enable the Vault's Database Secret Engine with Vault
 
 ```sh
 
