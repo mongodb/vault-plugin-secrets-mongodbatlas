@@ -11,9 +11,13 @@ import (
 	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
+const envVarRunAccTests = "VAULT_ACC"
+
 const testMongoDBAtlasRole = `{"roles": [{"databaseName":"admin","roleName":"atlasAdmin"}]}`
 
-func TestMongoDBAtlas_Initialize(t *testing.T) {
+var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
+
+func TestAcceptanceDatabaseUser_Initialize(t *testing.T) {
 	connectionDetails := map[string]interface{}{
 		"public_key":  "aspergesme",
 		"private_key": "domine",
@@ -30,7 +34,10 @@ func TestMongoDBAtlas_Initialize(t *testing.T) {
 	}
 }
 
-func TestMongoDBAtlas_CreateUser(t *testing.T) {
+func TestAcceptanceDatabaseUser_CreateUser(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
@@ -72,7 +79,10 @@ func TestMongoDBAtlas_CreateUser(t *testing.T) {
 
 }
 
-func TestMongoDBAtlas_RevokeUser(t *testing.T) {
+func TestAcceptanceDatabaseUser_RevokeUser(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
@@ -111,7 +121,10 @@ func TestMongoDBAtlas_RevokeUser(t *testing.T) {
 	}
 }
 
-func TestMongoDB_SetCredentials(t *testing.T) {
+func TestAcceptanceDatabaseUser_SetCredentials(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
 
 	publicKey := os.Getenv("ATLAS_PUBLIC_KEY")
 	privateKey := os.Getenv("ATLAS_PRIVATE_KEY")
