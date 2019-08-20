@@ -17,7 +17,7 @@ const testMongoDBAtlasRole = `{"roles": [{"databaseName":"admin","roleName":"atl
 
 var runAcceptanceTests = os.Getenv(envVarRunAccTests) == "1"
 
-func TestAcceptanceDatabaseUser_Initialize(t *testing.T) {
+func TestIntegrationDatabaseUser_Initialize(t *testing.T) {
 	connectionDetails := map[string]interface{}{
 		"public_key":  "aspergesme",
 		"private_key": "domine",
