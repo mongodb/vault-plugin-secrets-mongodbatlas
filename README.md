@@ -15,7 +15,7 @@ directly via [security@mongodb.com](mailto:security@mongodb.com) or [open a tick
 - [MongoDB Atlas Website](https://www.mongodb.com/cloud/atlas)
 - [MongoDB Atlas Secrets Docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
 - [Vault Github](https://www.github.com/hashicorp/vault)
-- [General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
+- [Vault General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
 - [Vault Discussion List](https://groups.google.com/forum/#!forum/vault-tool)
 
 
@@ -95,9 +95,9 @@ $ vault server -config=path/to/config.json ...
 
 Once the server is started, register the plugin in the Vault server's [plugin catalog](https://www.vaultproject.io/docs/internals/plugins.html#plugin-catalog):
 
-#### MongoDB Atlas Secrets Backend
+#### MongoDB Atlas Secrets Engine
 
-To register the MongoDB Atlas Secrets Backend run the following:
+To register the MongoDB Atlas Secrets Engine run the following:
 
 ```sh
 $ vault write sys/plugins/catalog/vault-plugin-secrets-mongodbatlas \
@@ -107,7 +107,7 @@ $ vault write sys/plugins/catalog/vault-plugin-secrets-mongodbatlas \
 
 Any name can be substituted for the plugin name "mongodbatlas". This
 name will be referenced in the next step, where we enable the secrets
-plugin backend using the MongoDB Atlas Secrets Backend:
+plugin backend using the MongoDB Atlas Secrets Engine:
 
 ```sh
 $ vault secrets enable --plugin-name='mongodbatlas' --path="mongodbatlas" plugin
