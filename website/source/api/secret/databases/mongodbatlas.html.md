@@ -13,7 +13,7 @@ The MongoDB Atlas database plugin is one of the supported plugins for the databa
 secrets engine. This plugin generates database credentials dynamically based on
 configured roles for the MongoDB Atlas database.
 
-  ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in 
+  ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in
     progress. Until then follow the instructions in the [README developing section](./../../../../../README.md).
 
 
@@ -33,7 +33,7 @@ has a number of parameters to further configure a connection.
 - `private_key` `(string: <required>)` - The Private Key used to connect with MongoDB Atlas API.
 - `project_id` `(string: <required>)` - The Project ID to which the database belongs to.
 
-     ~> **Notice:** Do not use your MongoDB Atlas root account credentials. 
+     ~> **Notice:** Do not use your MongoDB Atlas root account credentials.
      Instead generate a dedicated Programmatic API key with appropriate roles.
 
 ### Sample Payload
@@ -73,10 +73,10 @@ list the plugin does not support that statement type.
 - `creation_statements` `(string: <required>)` – Specifies the database
   statements executed to create and configure a user. Must be a
   serialized JSON object, or a base64-encoded serialized JSON object.
-  The object can optionally contain a "database_name", the name of 
-  the authentication database to log into MongoDB. In Atlas deployments of 
-  MongoDB, the authentication database is always the admin database. And 
-  also must contain a "roles" array. This array contains objects that holds 
+  The object can optionally contain a "database_name", the name of
+  the authentication database to log into MongoDB. In Atlas deployments of
+  MongoDB, the authentication database is always the admin database. And
+  also must contain a "roles" array. This array contains objects that holds
   a series of roles "roleName", an optional "databaseName" and "collectionName"
   value. For more information regarding the `roles` field, refer to
   [MongoDB Atlas documentation](https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/).

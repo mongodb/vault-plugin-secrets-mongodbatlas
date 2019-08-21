@@ -88,9 +88,9 @@ either the MongoDB Atlas Organization or Project level with the appropriate role
 1. Create a Vault role for a MongoDB Atlas Programmatic API Key by mapping appropriate arguments to the
    organization or project designated.
 
-    - Organization API Key: Set `organization_id` argument with the appropriate
+  - Organization API Key: Set `organization_id` argument with the appropriate
     [Organization Level Roles](https://docs.atlas.mongodb.com/reference/user-roles/#organization-roles).
-    - Project API Key: Set `project_id` with the appropriate [Project Level Roles](https://docs.atlas.mongodb.com/reference/user-roles/#project-roles).
+  - Project API Key: Set `project_id` with the appropriate [Project Level Roles](https://docs.atlas.mongodb.com/reference/user-roles/#project-roles).
   - Create a Organization Key and Assign to a project: creates an Organization
     key and [Assigns]() it to a project, for this `project_id` and `organization_id`
     must be set, with the appropiate [Project Level Roles](https://docs.atlas.mongodb.com/reference/user-roles/#project-roles).
