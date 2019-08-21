@@ -1,14 +1,18 @@
-# Vault Plugin: MongoDB Atlas Secrets Engine
+# Vault Plugins: MongoDB Atlas Secrets Engine and MongoDB Atlas Database Plugin
 
-This is a Secrets Engine to be used with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
-This plugin generates unique, ephemeral datababase user credentials and programmatic API keys.
+This contains two plugins two plugins for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
+Both plugins generates unique, ephemeral programmatic API keys and  datababase user credentials respectively.
+
+The plugins are located in the following directories:
+  - **MongoDB Atlas Secrets Engine:** `plugins/logical/mongodbatlas/`
+  - **MongoDB Atlas Database plugin:** `plugins/database/mongodbatlas`
 
 **Please note**: Hashicorp takes Vault's security and their users' trust very seriously, as does MongoDB.
 
-If you believe you have found a security issue in Vault or with this plugin,
-_please responsibly disclose_ by
+If you believe you have found a security issue in Vault or with this plugin, _please responsibly disclose_ by
 contacting us at [security@hashicorp.com](mailto:security@hashicorp.com) and contact MongoDB
-directly via [security@mongodb.com](mailto:security@mongodb.com) or [open a ticket](https://jira.mongodb.org/plugins/servlet/samlsso?redirectTo=%2Fbrowse%2FSECURITY) (link is external).
+directly via [security@mongodb.com](mailto:security@mongodb.com) or
+[open a ticket](https://jira.mongodb.org/plugins/servlet/samlsso?redirectTo=%2Fbrowse%2FSECURITY) (link is external).
 
 ## Quick Links
 - [Vault Website](https://www.vaultproject.io)
@@ -28,9 +32,20 @@ and is meant to work with Vault. This guide assumes you have already installed V
 and have a basic understanding of how Vault works. Otherwise, first read this guide on
 how to [get started with Vault](https://www.vaultproject.io/intro/getting-started/install.html).
 
-If you are using Vault 11.0.1 or above, this plugin is packaged with Vault
-and by default can be enabled by running:
+If you are using Vault 11.0.1 or above, both plugins are packaged
+with Vault and by default. MongoDB Atlas Secrets Engine can be enabled by running:
+
  ```sh
+
+ $ vault secrets enable mongodbatlas
+
+ Success! Enabled the mongodbatlas secrets engine at: mongodbatlas/
+
+ ```
+
+ And MongoDB Atlas Database plugin can be enabled with:
+
+```sh
 
  $ vault secrets enable mongodbatlas
 
@@ -41,6 +56,21 @@ and by default can be enabled by running:
  If you are testing this plugin in an earlier version of Vault or
  want to develop, see the next section.
 
+ ```sh
+
+  $ vault secrets enable database
+
+  Success! Enabled the database secrets engine at: database/
+
+$ vault write database/config/my-mongodbatlas-database \
+    plugin_name=mongodbatlas-database-plugin \
+    allowed_roles="my-role" \
+    public_key="a-public-key" \
+    private_key="a-private-key!" \
+    project_id="a-project-id"
+
+ ```
+
 ## Developing
 
 If you wish to work on this plugin, you'll first need [Go](https://www.golang.org)
@@ -49,6 +79,7 @@ installed on your machine (whichever version is required by Vault).
 Make sure Go is properly installed, including setting up a [GOPATH](https://golang.org/doc/code.html#GOPATH).
 
 ### Get Plugin
+
 Clone this repository:
 
 ```
@@ -67,7 +98,7 @@ Then you can download any of the required tools to bootstrap your environment:
 $ make bootstrap
 ```
 
-To compile a development version of this plugin, run `make` or `make dev`.
+To compile a development version of this plugins, run `make` or `make dev`.
 This will put the plugin binary in the `bin` and `$GOPATH/bin` folders. `dev`
 mode will only generate the binary for your platform and is faster:
 
