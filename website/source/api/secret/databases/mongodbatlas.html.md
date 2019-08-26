@@ -77,6 +77,12 @@ list the plugin does not support that statement type.
   a series of roles "roleName", an optional "databaseName" and "collectionName"
   value. For more information regarding the `roles` field, refer to
   [MongoDB Atlas documentation](https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/).
+- `default_ttl` `(string/int): 0` - Specifies the TTL for the leases associated with this role.
+  Accepts time suffixed strings ("1h") or an integer number of seconds. Defaults to system/engine default TTL time.
+  `max_ttl` `(string/int): 0` - Specifies the maximum TTL for the leases associated with this role. Accepts time
+  suffixed strings ("1h") or an integer number of seconds. Defaults to system/mount default TTL time; this value
+  is allowed to be less than the mount max TTL (or, if not set, the system max TTL),
+  but it is not allowed to be longer. See also [The TTL General Case](https://www.vaultproject.io/docs/concepts/tokens.html#the-general-case).
 
 
 ### Sample Creation Statement
