@@ -21,6 +21,7 @@ directly via [security@mongodb.com](mailto:security@mongodb.com) or
 - [Vault Website](https://www.vaultproject.io)
 - [MongoDB Atlas Website](https://www.mongodb.com/cloud/atlas)
 - [MongoDB Atlas Secrets Engine Docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
+- [Database Secrets Engine for MongoDB Atlas](https://www.vaultproject.io/docs/secrets/databases/mongodbatlas.html)
 - [Vault Github](https://www.github.com/hashicorp/vault)
 - [Vault General Announcement List](https://groups.google.com/forum/#!forum/hashicorp-announce)
 - [Vault Discussion List](https://groups.google.com/forum/#!forum/vault-tool)
