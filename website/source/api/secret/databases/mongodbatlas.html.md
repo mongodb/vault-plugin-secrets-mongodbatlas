@@ -4,14 +4,14 @@ page_title: "MongoDB Atlas - Database - Secrets Engines - HTTP API"
 sidebar_title: "MongoDB Atlas"
 sidebar_current: "api-http-secret-databases-mongodbatlas"
 description: |-
-  The MongoDB Atlas plugin for Vault's database secrets engine generates database credentials to access MongoDB Atlas databases.
+  The MongoDB Atlas plugin for Vault's Database Secrets Engine generates MongoDB Database User credentials for MongoDB Atlas.
 ---
 
-# MongoDB Database Plugin HTTP API
+# MongoDB Atlas Database Plugin HTTP API
 
-The MongoDB Atlas database plugin is one of the supported plugins for the database
-secrets engine. This plugin generates database credentials dynamically based on
-configured roles for the MongoDB Atlas database.
+The MongoDB Atlas plugin is one of the supported plugins for the Database
+Secrets Engine. This plugin generates MongoDB Atlas Database User credentials dynamically based on
+configured roles.
 
   ~> **Notice:** The following will be accurate after review and approval by Hashicorp, which is in
     progress. Until then follow the instructions in the [README developing section](./../../../../../README.md).
@@ -29,12 +29,9 @@ has a number of parameters to further configure a connection.
 
 ### Parameters
 
-- `public_key` `(string: <required>)` – The Public Key used to authenticate with MongoDB Atlas API.
-- `private_key` `(string: <required>)` - The Private Key used to connect with MongoDB Atlas API.
-- `project_id` `(string: <required>)` - The Project ID to which the database belongs to.
-
-     ~> **Notice:** Do not use your MongoDB Atlas root account credentials.
-     Instead generate a dedicated Programmatic API key with appropriate roles.
+- `public_key` `(string: <required>)` – The Public Programmatic API Key used to authenticate with the MongoDB Atlas API.
+- `private_key` `(string: <required>)` - The Private Programmatic API Key used to connect with MongoDB Atlas API.
+- `project_id` `(string: <required>)` - The [Project ID](https://docs.atlas.mongodb.com/api/#group-id) the Database User should be created within.
 
 ### Sample Payload
 
@@ -60,10 +57,10 @@ $ curl \
 
 ## Statements
 
-Statements are configured during role creation and are used by the plugin to
-determine what is sent to the database on user creation, renewing, and
-revocation. For more information on configuring roles see the [Role
-API](/api/secret/databases/index.html#create-role) in the database secrets engine docs.
+Statements are configured during Vault role creation and are used by the plugin to
+determine what is sent to MongoDB Atlas upon user creation, renewal, and
+revocation. For more information on configuring roles see the [Role API](/api/secret/databases/index.html#create-role)
+in the Database Secrets Engine docs.
 
 ### Parameters
 
@@ -90,6 +87,10 @@ list the plugin does not support that statement type.
 	"roles": [{
 		"databaseName": "admin",
 		"roleName": "atlasAdmin"
-	}]
+	},
+  {
+    "collectionName": "acollection",
+    "roleName": "read"
+  }]
 }
 ```

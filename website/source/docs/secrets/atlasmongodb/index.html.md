@@ -13,10 +13,16 @@ The MongoDB Atlas Secrets Engine generates Programmatic API keys. This allows on
 lifecycle of these MongoDB Atlas secrets programmatically. The created MongoDB Atlas secrets are
 time-based and are automatically revoked when the Vault lease expires, unless renewed.
 
+This MongoDB Atlas Secrets Engine supports the creation of Programmatic API keys. Vault will create
+a Programmatic API key for each lease that provide appropriate access to the defined MongoDB Atlas
+project or organization with appropriate role(s) . The MongoDB Atlas Programmatic API Key Public and
+Private Key is returned to the caller. To learn more about Programmatic API Keys visit the
+[Programmatic API Keys Doc](https://docs.atlas.mongodb.com/reference/api/apiKeys/)..
+
 This Secrets Engine supports the creation of Programmatic API keys Vault will create a Programmatic
 API key for each lease, each key has defined role(s) that provide appropriate access to the defined
 MongoDB Atlas project or organization. The public and private key is returned to the caller. To see
-more about Programmatic API Keys visit the [Programmatic API Keys Doc](https://docs.atlas.mongodb.com/reference/api/apiKeys/).
+more about Programmatic API Keys visit the
 
 ## Setup
 
@@ -37,8 +43,8 @@ steps are usually completed by an operator or configuration management tool.
     By default, the Secrets Engine will mount at the name of the engine. To
     enable the Secrets Engine at a different path, use the `-path` argument.
 
-1. It's necessary to generate and configure a MongoDB Atlas Programmatic API Key for your organization
-   that has sufficient permissions to allow Vault to create other Programmatic API Keys.
+2. It's necessary to generate and configure a MongoDB Atlas Programmatic API Key for your organization
+   or project that has sufficient permissions to allow Vault to create other Programmatic API Keys.
 
     In order to grant Vault programmatic access to an organization or project using only the
     [API](https://docs.atlas.mongodb.com/api/) you need to create a MongoDB Atlas Programmatic API
@@ -51,7 +57,7 @@ steps are usually completed by an operator or configuration management tool.
     For more detailed instructions on how to create a Programmatic API Key in the Atlas UI, including
     available roles, visit the [Programmatic API Key documenation](https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys).
 
-1. Once you have a MongoDB Atlas Programmatic Key pair, as created in the previous step, Vault can now
+3. Once you have a MongoDB Atlas Programmatic Key pair, as created in the previous step, Vault can now
    be configured to use it with MongoDB Atlas:
 
     ```bash
@@ -71,8 +77,8 @@ steps are usually completed by an operator or configuration management tool.
 
 ## Programmatic API Keys
 
-The Programmatic API Key credential types, create a Vault role to generate a Programmatic API Key at
-either the MongoDB Atlas Organization or Project level with the appropriate role(s) for programmatic access.
+Programmatic API Key credential types create a Vault role to generate a Programmatic API Key at
+either the MongoDB Atlas Organization or Project level with the designated role(s) for programmatic access.
 
   Programmatic API Keys:
   - Has two parts, a public key and a private key
@@ -110,7 +116,8 @@ $ vault write mongodbatlas/roles/test \
     roles=GROUP_DATA_ACCESS_READ_ONLY
 ```
 
-In both of these examples Vault returns the public/private key pair generated.
+In both of these examples, after performing a read on `mongodbatlas/creds/test`, for an example of a `read` action
+refer to [## Programmatic API Key Whitelist](#programmatic-api-key-whitelist) section.
 
 ## Programmatic API Key Whitelist
 
@@ -127,20 +134,20 @@ block and IP address are added to the IP whitelist for Keys generated with this 
 
 Verify the created Programmatic API Key Vault role has the added CIDR block and IP address by running:
 
-```bash
-  $ vault read atlas/roles/test
+  ```bash
+    $ vault read atlas/roles/test
 
-    Key                       Value
-    ---                       -----
-    cidr_blocks               [192.168.1.3/32]
-    ip_addresses              [192.168.1.3]
-    max_ttl                   0s
-    organization_id           n/a
-    roles                     [GROUP_CLUSTER_MANAGER]
-    project_id                5cf5a45a9ccf6400e60981b6
-    roles                     n/a
-    ttl                       0s
-```
+      Key                       Value
+      ---                       -----
+      cidr_blocks               [192.168.1.3/32]
+      ip_addresses              [192.168.1.3]
+      max_ttl                   0s
+      organization_id           n/a
+      roles                     [GROUP_CLUSTER_MANAGER]
+      project_id                5cf5a45a9ccf6400e60981b6
+      roles                     n/a
+      ttl                       0s
+  ```
 
   ```bash
     $ vault read mongodbatlas/creds/test
@@ -157,7 +164,7 @@ Verify the created Programmatic API Key Vault role has the added CIDR block and 
 
 ## TTL and Max TTL
 
-Database User and Programmatic API Keys Vault role can also have a time-to-live (TTL) and maximum time-to-live (Max TTL).
+Programmatic API Keys Vault role can also have a time-to-live (TTL) and maximum time-to-live (Max TTL).
 When a credential expires and it's not renewed, it's automatically revoked. You can set the TTL and Max TTL for each role
 or globally using config/lease.
 

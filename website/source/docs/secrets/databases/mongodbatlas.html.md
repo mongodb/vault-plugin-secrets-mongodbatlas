@@ -24,8 +24,8 @@ the MongoDB database.
     Success! Enabled the database secrets engine at: database/
     ```
 
-    By default, the secrets engine will enable at the name of the engine. To
-    enable the secrets engine at a different path, use the `-path` argument.
+    The secrets engine will be enabled at the default path which is name of the engine. To
+    enable the secrets engine at a different path use the `-path` argument.
 
 1. Configure Vault with the proper plugin and connection information:
 
@@ -38,8 +38,8 @@ the MongoDB database.
         project_id="a-project-id"
     ```
 
-1. Configure a role that maps a name in Vault to a MongoDB command that executes and
-creates the database credential:
+2. Configure a role that maps a name in Vault to a MongoDB Atlas command that executes and
+   creates the Database User credential:
 
     ```text
     $ vault write database/roles/my-role \
