@@ -4,9 +4,9 @@ page_title: "MongoDB Atlas - Database - Secrets Engines"
 sidebar_title: "MongoDB Atlas"
 sidebar_current: "docs-secrets-databases-mongodb-atlas"
 description: |-
-  MongoDB Atlas is one of the supported plugins for the database secrets engine. This
-  plugin generates database credentials dynamically based on configured roles
-  for the MongoDB Atlas API.
+  MongoDB Atlas is one of the supported plugins for the Database Secrets Engine. This
+  plugin generates MongoDB Atlas Database User credentials dynamically based on configured Vault roles for
+  the MongoDB Atlas.
 ---
 
 # MongoDB Atlas Database Secrets Engine
