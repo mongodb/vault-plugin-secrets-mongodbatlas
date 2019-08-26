@@ -203,6 +203,7 @@ $ VAULT_ACC=1 make test
 
 **The following will be accurate after review and approval by Hashicorp, which is in progress. Until then read the docs within this repo for more information.**
 
-See up-to-date **MongoDB Atlas Secrets Engine** [docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html)
+See up-to-date **MongoDB Atlas Secrets Engine** [docs](https://www.vaultproject.io/docs/secrets/mongodbatlas/index.html),
+ **Database Secrets Engine for MongoDB Atlas plugin** [docs](https://www.vaultproject.io/docs/secrets/databases/mongodbatlas.html)
 and general [API docs](https://www.vaultproject.io/api/secret/mongodbatlas/index.html).
 

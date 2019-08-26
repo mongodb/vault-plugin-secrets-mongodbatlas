@@ -16,8 +16,9 @@ time-based and are automatically revoked when the Vault lease expires, unless re
 This MongoDB Atlas Secrets Engine supports the creation of Programmatic API keys. Vault will create
 a Programmatic API key for each lease that provide appropriate access to the defined MongoDB Atlas
 project or organization with appropriate role(s) . The MongoDB Atlas Programmatic API Key Public and
-Private Key is returned to the caller. To learn more about Programmatic API Keys visit the
-[Programmatic API Keys Doc](https://docs.atlas.mongodb.com/reference/api/apiKeys/)..
+Private Key is returned to the caller. To learn more about Programmatic API Keys visit
+[Programmatic API Keys Doc](https://docs.atlas.mongodb.com/reference/api/apiKeys/).
+
 
 This Secrets Engine supports the creation of Programmatic API keys Vault will create a Programmatic
 API key for each lease, each key has defined role(s) that provide appropriate access to the defined
