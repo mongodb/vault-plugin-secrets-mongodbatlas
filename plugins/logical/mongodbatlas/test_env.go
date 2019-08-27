@@ -2,6 +2,7 @@ package mongodbatlas
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/vault/sdk/logical"
@@ -28,6 +29,25 @@ func (e *testEnv) AddConfig(t *testing.T) {
 		Data: map[string]interface{}{
 			"public_key":  e.PublicKey,
 			"private_key": e.PrivateKey,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+	if resp != nil {
+		t.Fatal("expected nil response to represent a 204")
+	}
+}
+
+func (e *testEnv) AddLeaseConfig(t *testing.T) {
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "config/lease",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"ttl":     "80s",
+			"max_ttl": "160s",
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -68,6 +88,25 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectIDAndOrgID(t *testing.T) {
 			"project_id":      e.ProjectID,
 			"roles":           roles,
 			"project_roles":   projectRoles,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithTTL(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"organization_id": e.OrganizationID,
+			"roles":           roles,
+			"ttl":             "20s",
+			"max_ttl":         "60s",
 		},
 	}
 	resp, err := e.Backend.HandleRequest(e.Context, req)
@@ -171,6 +210,20 @@ func (e *testEnv) ReadProgrammaticAPIKeyRule(t *testing.T) {
 		t.Fatal("failed to receive secret_key")
 	}
 	e.MostRecentSecret = resp.Secret
+}
+
+func (e *testEnv) CheckLease(t *testing.T) {
+	ttl := int(e.MostRecentSecret.TTL.Seconds())
+	wantedTTL := 20
+	maxTTL := int(e.MostRecentSecret.MaxTTL.Seconds())
+	wantedMaxTTL := 60
+
+	if ttl != wantedTTL {
+		t.Fatal(fmt.Sprintf("ttl=%d, wanted=%d", ttl, wantedTTL))
+	}
+	if maxTTL != wantedMaxTTL {
+		t.Fatal(fmt.Sprintf("maxTTL=%d, wanted=%d", ttl, wantedMaxTTL))
+	}
 }
 
 func (e *testEnv) RenewProgrammaticAPIKeys(t *testing.T) {
