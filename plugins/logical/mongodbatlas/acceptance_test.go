@@ -33,9 +33,9 @@ func TestAcceptanceProgrammaticAPIKey(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRole)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
@@ -51,9 +51,9 @@ func TestAcceptanceProgrammaticAPIKey_WithProjectID(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithProjectID)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
@@ -69,9 +69,9 @@ func TestAcceptanceProgrammaticAPIKey_ProjectWithIPWhitelist(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleProjectWithIP)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
@@ -87,9 +87,9 @@ func TestAcceptanceProgrammaticAPIKey_WithIPWhitelist(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithIP)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
@@ -105,9 +105,9 @@ func TestAcceptanceProgrammaticAPIKey_WithCIDRWhitelist(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithCIDR)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
@@ -123,9 +123,29 @@ func TestAcceptanceProgrammaticAPIKey_AssignToProject(t *testing.T) {
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
 	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithProjectIDAndOrgID)
-	t.Run("read progammatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
-	t.Run("renew progammatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
-	t.Run("revoke progammatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+
+}
+
+func TestAcceptanceProgrammaticAPIKey_WithTTL(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
+
+	acceptanceTestEnv, err := newAcceptanceTestEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("add config", acceptanceTestEnv.AddConfig)
+	t.Run("add config", acceptanceTestEnv.AddLeaseConfig)
+	t.Run("add programmatic API Key role with TTL", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithTTL)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("check lease for programmatic API key cred", acceptanceTestEnv.CheckLease)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
 
 }
 
