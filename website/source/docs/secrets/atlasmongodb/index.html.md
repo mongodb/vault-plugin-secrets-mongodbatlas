@@ -4,7 +4,7 @@ page_title: "MongoDB Atlas - Secrets Engines"
 sidebar_title: "MongoDB Atlas"
 sidebar_current: "docs-secrets-atlasmongodb"
 description: |-
-  The MongoDB Atlas Secrets Engine for Vault generates MongoDB Programmatic API Keys dynamically.
+  The MongoDB Atlas Secrets Engine for Vault generates MongoDB Atlas Programmatic API Keys dynamically.
 ---
 
 # MongoDB Atlas Secrets Engine
@@ -18,12 +18,6 @@ a Programmatic API key for each lease that provide appropriate access to the def
 project or organization with appropriate role(s) . The MongoDB Atlas Programmatic API Key Public and
 Private Key is returned to the caller. To learn more about Programmatic API Keys visit the
 [Programmatic API Keys Doc](https://docs.atlas.mongodb.com/reference/api/apiKeys/).
-
-
-This Secrets Engine supports the creation of Programmatic API keys Vault will create a Programmatic
-API key for each lease, each key has defined role(s) that provide appropriate access to the defined
-MongoDB Atlas project or organization. The public and private key is returned to the caller. To see
-more about Programmatic API Keys visit the
 
 ## Setup
 

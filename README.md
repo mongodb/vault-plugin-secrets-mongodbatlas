@@ -31,18 +31,33 @@ directly via [security@mongodb.com](mailto:security@mongodb.com) or
 
 **The following will be accurate after review and approval by Hashicorp, which is in progress. Until then follow the instructions in the developing section that follows:**
 
-These are a [Vault specific plugins (aka Secrets Engines/Backends)](https://www.vaultproject.io/docs/internals/plugins.html). This guide assumes you have already installed Vault This guide assumes you have already installed Vault
+These are a [Vault specific plugins (aka Secrets Engines/Backends)](https://www.vaultproject.io/docs/internals/plugins.html). This guide assumes you have already installed Vault
 and have a basic understanding of how Vault works. Otherwise, first read this guide on
 how to [get started with Vault](https://www.vaultproject.io/intro/getting-started/install.html).
 
 If you are using Vault 11.0.1 or above, both plugins are packaged with Vault. The MongoDB Atlas Secrets Engine can be enabled by running:
 
+The MongoDB Atlas Secrets Engine can be enabled by running:
 
  ```sh
 
  $ vault secrets enable mongodbatlas
 
  Success! Enabled the mongodbatlas secrets engine at: mongodbatlas/
+
+ ```
+
+ Then, write the configuration for the plugin and the lease, this is an example:
+
+ ```sh
+
+vault write mongodbatlas/config/root \
+    public_key="a-public-key" \
+    private_key="a-private-key"
+
+vault write mongodbatlas/config/lease \
+	ttl=300 \
+	max_ttl=4800
 
  ```
 
@@ -56,7 +71,7 @@ The Database Secrets Engine for MongoDB Atlas can be enabled by running:
 
 ```
 
-Then, write the configuration for the plugin:
+Then, write the configuration for the plugin, for example:
 
 ```sh
   $ vault write database/config/my-mongodbatlas-database \
