@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-DATABASE_TOOL="mongodbatlas-database-plugin"
-SECRET_TOOL="vault-plugin-secrets-mongodbatlas"
-DATABASE_DIR="plugins/database/mongodbatlas/"
-SECRET_DIR="plugins/logical/mongodbatlas/cmd/"
-
+TOOL=vault-plugin-secrets-mongodbatlas
+#
 # This script builds the application from source for multiple platforms.
 set -e
 
@@ -48,51 +45,16 @@ if [ "${VAULT_DEV_BUILD}x" != "x" ]; then
     XC_OSARCH=$(go env GOOS)/$(go env GOARCH)
 fi
 
-# If its dev mode, only build for our self
-if [ "${DOCKER_BUILD}x" != "x" ]; then
-    XC_OS="linux"
-    XC_ARCH="amd64"
-    XC_OSARCH="linux/amd64"
-fi
 
-
-# Build Database Plugin tool
-cd "${DIR}/${DATABASE_DIR}/${DATABASE_TOOL}"
-
-# Delete the old dir
-echo "==> Removing old directory..."
-rm -f bin/*
-rm -rf pkg/*
-mkdir -p bin/
+# The main method we need for building is in the cmd directory
+cd "${DIR}/cmd/${TOOL}"
 
 # Build!
 echo "==> Building..."
 gox \
     -osarch="${XC_OSARCH}" \
-    -ldflags "-X github.com/hashicorp/${DATABASE_TOOL}/version.GitCommit='${GIT_COMMIT}${GIT_DIRTY}'" \
-    -output "${DIR}/pkg/{{.OS}}_{{.Arch}}/${DATABASE_TOOL}" \
-    -tags="${BUILD_TAGS}" \
-    .
-
-# Return to the home directory
-cd "$DIR"
-
-
-# Build Secret Engine
-cd "${DIR}/${SECRET_DIR}/${SECRET_TOOL}"
-
-# Delete the old dir
-echo "==> Removing old directory..."
-rm -f bin/*
-rm -rf pkg/*
-mkdir -p bin/
-
-# Build!
-echo "==> Building..."
-gox \
-    -osarch="${XC_OSARCH}" \
-    -ldflags "-X github.com/hashicorp/${SECRET_TOOL}/version.GitCommit='${GIT_COMMIT}${GIT_DIRTY}'" \
-    -output "${DIR}/pkg/{{.OS}}_{{.Arch}}/${SECRET_TOOL}" \
+    -ldflags "-X github.com/hashicorp/${TOOL}/version.GitCommit='${GIT_COMMIT}${GIT_DIRTY}'" \
+    -output "${DIR}/pkg/{{.OS}}_{{.Arch}}/${TOOL}" \
     -tags="${BUILD_TAGS}" \
     .
 
@@ -111,7 +73,7 @@ for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
     cp ${F} ${MAIN_GOPATH}/bin/
 done
 
-if [ "${DOCKER_BUILD}x" = "x" ]; then
+if [ "${VAULT_DEV_BUILD}x" = "x" ]; then
     # Zip and copy to the dist dir
     echo "==> Packaging..."
     for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
@@ -121,26 +83,6 @@ if [ "${DOCKER_BUILD}x" = "x" ]; then
         pushd $PLATFORM >/dev/null 2>&1
         zip ../${OSARCH}.zip ./*
         popd >/dev/null 2>&1
-    done
-fi
-
-if [ "${VAULT_DEV_TEST_BUILD}x" = "x" ]; then
-    # Zip and copy to the dist dir
-    echo "==> Packaging..."
-    for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-        OSARCH=$(basename ${PLATFORM})
-        echo "--> ${OSARCH}"
-
-        pushd $PLATFORM >/dev/null 2>&1
-        zip ../${OSARCH}.zip ./*
-        popd >/dev/null 2>&1
-    done
-
-    # Copy our OS/Arch to the bin/ directory
-    DEV_PLATFORM="./pkg/linux_amd64"
-    for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
-        cp ${F} bin/
-        cp ${F} ${MAIN_GOPATH}/bin/
     done
 fi
 

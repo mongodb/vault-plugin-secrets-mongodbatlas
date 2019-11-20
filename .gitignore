@@ -51,4 +51,6 @@ Temporary Items
 vault-plugin-secrets-mongodbatlas
 mongodbatlas-database-plugin
 vault*
+
+.idea/
 # End of https://www.gitignore.io/api/go,macos

@@ -1,4 +1,4 @@
-module github.com/mongodb/vault-plugin-secrets-mongodbatlas
+module github.com/hashicorp/vault-plugin-secrets-mongodbatlas
 
 go 1.12
 
