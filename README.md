@@ -1,12 +1,12 @@
 # Vault Plugins: MongoDB Atlas Secrets Engine and Database Secrets Engine for MongoDB Atlas plugin
 
-**VERY IMPORTANT INFO: This plugin is currently under development.  
+**VERY IMPORTANT INFO: This plugin is currently under development. ** 
 
-The README below is also in development and has been written to be accurate once development is complete.   
+**The README below is also in development and has been written to be accurate once development is complete.  ** 
 
-Feel free to test it out following the instructions under the Developing section below, however consider this beta until it is verified by HashiCorp, which is in progress.
+**Feel free to test it out following the instructions under the Developing section below, however consider this beta until it is verified by HashiCorp, which is in progress.**
 
-Once verified and released versions will be documented in a CHANGELOG**
+**Once verified and released versions will be documented in a CHANGELOG**
 
 This contains two Secrets Engines specific to MongoDB Atlas for use with [Hashicorp Vault](https://github.com/hashicorp/vault).
 The first is the MongoDB Atlas Secrets Engine which generates unique, ephemeral [Programmatic API](https://docs.atlas.mongodb.com/reference/api/apiKeys/) keys for MongoDB Atlas.
