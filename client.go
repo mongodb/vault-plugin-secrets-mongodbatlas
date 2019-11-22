@@ -57,7 +57,7 @@ func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Clie
 
 func getRootConfig(ctx context.Context, s logical.Storage) (*rootConfig, error) {
 
-	entry, err := s.Get(ctx, "config/root")
+	entry, err := s.Get(ctx, "config")
 	if err != nil {
 		return nil, err
 	}
@@ -72,5 +72,5 @@ func getRootConfig(ctx context.Context, s logical.Storage) (*rootConfig, error) 
 
 	}
 
-	return nil, errors.New("empty config/root entry")
+	return nil, errors.New("empty config entry")
 }

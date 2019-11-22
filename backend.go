@@ -30,7 +30,7 @@ func NewBackend() *Backend {
 				framework.WALPrefix,
 			},
 			SealWrapStorage: []string{
-				"config/root",
+				"config",
 			},
 		},
 

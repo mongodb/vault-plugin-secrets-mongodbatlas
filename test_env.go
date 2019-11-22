@@ -24,7 +24,7 @@ type testEnv struct {
 func (e *testEnv) AddConfig(t *testing.T) {
 	req := &logical.Request{
 		Operation: logical.UpdateOperation,
-		Path:      "config/root",
+		Path:      "config",
 		Storage:   e.Storage,
 		Data: map[string]interface{}{
 			"public_key":  e.PublicKey,

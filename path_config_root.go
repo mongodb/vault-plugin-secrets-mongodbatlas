@@ -9,7 +9,7 @@ import (
 
 func pathConfigRoot(b *Backend) *framework.Path {
 	return &framework.Path{
-		Pattern: "config/root",
+		Pattern: "config",
 		Fields: map[string]*framework.FieldSchema{
 			"public_key": &framework.FieldSchema{
 				Type:        framework.TypeString,
@@ -33,7 +33,7 @@ func (b *Backend) pathConfigRootWrite(ctx context.Context, req *logical.Request,
 	b.clientMutex.Lock()
 	defer b.clientMutex.Unlock()
 
-	entry, err := logical.StorageEntryJSON("config/root", rootConfig{
+	entry, err := logical.StorageEntryJSON("config", rootConfig{
 		PublicKey:  data.Get("public_key").(string),
 		PrivateKey: data.Get("private_key").(string),
 	})

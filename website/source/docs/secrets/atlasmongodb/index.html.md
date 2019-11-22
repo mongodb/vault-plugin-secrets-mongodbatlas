@@ -56,7 +56,7 @@ steps are usually completed by an operator or configuration management tool.
    be configured to use it with MongoDB Atlas:
 
     ```bash
-    $ vault write mongodbatlas/config/root \
+    $ vault write mongodbatlas/config \
         public_key=yhltsvan \
         private_key=2c130c23-e6b6-4da8-a93f-a8bf33218830
     ```
@@ -66,7 +66,7 @@ steps are usually completed by an operator or configuration management tool.
     on API Keys. Since Vault uses the official [MongoDB Atlas Client](https://github.com/mongodb/go-client-mongodb-atlas),
     it will use the specified credentials.
 
-    <!-- ~> **Notice:** Even though the path above is `mongodbatlas/config/root`, do not use
+    <!-- ~> **Notice:** Even though the path above is `mongodbatlas/config`, do not use
     your MongoDB Atlas root account credentials. Instead generate a dedicated Programmatic API key with appropriate roles. -->
 
 

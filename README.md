@@ -53,7 +53,7 @@ The MongoDB Atlas Secrets Engine can be enabled by running:
 
  ```sh
 
-vault write mongodbatlas/config/root \
+vault write mongodbatlas/config \
     public_key="a-public-key" \
     private_key="a-private-key"
 
