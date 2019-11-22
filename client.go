@@ -70,5 +70,5 @@ func getRootConfig(ctx context.Context, s logical.Storage) (*digest.Transport, e
 
 	}
 
-	return nil, errors.New("Empty config/root entry")
+	return nil, errors.New("empty config/root entry")
 }
