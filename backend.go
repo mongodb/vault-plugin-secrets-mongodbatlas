@@ -12,7 +12,6 @@ import (
 	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
-//Factory ...
 func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend, error) {
 	b := NewBackend()
 	if err := b.Setup(ctx, conf); err != nil {
@@ -21,7 +20,6 @@ func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend,
 	return b, nil
 }
 
-// NewBackend ...
 func NewBackend() *Backend {
 	var b Backend
 	b.Backend = &framework.Backend{
@@ -55,7 +53,6 @@ func NewBackend() *Backend {
 	return &b
 }
 
-// Backend ...
 type Backend struct {
 	*framework.Backend
 
@@ -69,7 +66,6 @@ type Backend struct {
 	system logical.SystemView
 }
 
-// Setup ...
 func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) error {
 	b.logger = config.Logger
 	b.system = config.System
