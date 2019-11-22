@@ -1,8 +1,8 @@
 # Vault Plugins: MongoDB Atlas Secrets Engine and Database Secrets Engine for MongoDB Atlas plugin
 
-**VERY IMPORTANT INFO: This plugin is currently under development. ** 
+**VERY IMPORTANT INFO: This plugin is currently under development.** 
 
-**The README below is also in development and has been written to be accurate once development is complete.  ** 
+**The README below is also in development and has been written to be accurate once development is complete.** 
 
 **Feel free to test it out following the instructions under the Developing section below, however consider this beta until it is verified by HashiCorp, which is in progress.**
 
