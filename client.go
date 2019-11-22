@@ -38,7 +38,12 @@ func (b *Backend) clientMongo(ctx context.Context, s logical.Storage) (*mongodba
 }
 
 func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Client, error) {
-	transport, err := getRootConfig(ctx, s)
+
+	config, err := getRootConfig(ctx, s)
+
+
+	transport := digest.NewTransport(config.PublicKey, config.PrivateKey)
+
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +56,7 @@ func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Clie
 	return mongodbatlas.NewClient(client), nil
 }
 
-func getRootConfig(ctx context.Context, s logical.Storage) (*digest.Transport, error) {
+func getRootConfig(ctx context.Context, s logical.Storage) (*rootConfig, error) {
 
 	entry, err := s.Get(ctx, "config/root")
 	if err != nil {
@@ -63,10 +68,8 @@ func getRootConfig(ctx context.Context, s logical.Storage) (*digest.Transport, e
 			return nil, errwrap.Wrapf("error reading root configuration: {{err}}", err)
 		}
 
-		transport := digest.NewTransport(config.PublicKey, config.PrivateKey)
-
-		// return the transport we are done
-		return transport, nil
+		// return the config, we are done
+		return config, nil
 
 	}
 
