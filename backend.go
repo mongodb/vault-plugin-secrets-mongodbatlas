@@ -37,7 +37,7 @@ func NewBackend() *Backend {
 		Paths: []*framework.Path{
 			pathRolesList(&b),
 			pathRoles(&b),
-			pathConfigRoot(&b),
+			pathConfig(&b),
 			pathCredentials(&b),
 		},
 

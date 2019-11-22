@@ -55,14 +55,14 @@ func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Clie
 	return mongodbatlas.NewClient(client), nil
 }
 
-func getRootConfig(ctx context.Context, s logical.Storage) (*rootConfig, error) {
+func getRootConfig(ctx context.Context, s logical.Storage) (*config, error) {
 
 	entry, err := s.Get(ctx, "config")
 	if err != nil {
 		return nil, err
 	}
 	if entry != nil {
-		var config rootConfig
+		var config config
 		if err := entry.DecodeJSON(&config); err != nil {
 			return nil, errwrap.Wrapf("error reading root configuration: {{err}}", err)
 		}

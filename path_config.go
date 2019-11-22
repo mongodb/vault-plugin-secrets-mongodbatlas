@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathConfigRoot(b *Backend) *framework.Path {
+func pathConfig(b *Backend) *framework.Path {
 	return &framework.Path{
 		Pattern: "config",
 		Fields: map[string]*framework.FieldSchema{
@@ -21,19 +21,19 @@ func pathConfigRoot(b *Backend) *framework.Path {
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.UpdateOperation: b.pathConfigRootWrite,
+			logical.UpdateOperation: b.pathConfigWrite,
 		},
-		HelpSynopsis:    pathConfigRootHelpSyn,
-		HelpDescription: pathConfigRootHelpDesc,
+		HelpSynopsis:    pathConfigHelpSyn,
+		HelpDescription: pathConfigHelpDesc,
 	}
 }
 
-func (b *Backend) pathConfigRootWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) pathConfigWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 
 	b.clientMutex.Lock()
 	defer b.clientMutex.Unlock()
 
-	entry, err := logical.StorageEntryJSON("config", rootConfig{
+	entry, err := logical.StorageEntryJSON("config", config{
 		PublicKey:  data.Get("public_key").(string),
 		PrivateKey: data.Get("private_key").(string),
 	})
@@ -51,16 +51,16 @@ func (b *Backend) pathConfigRootWrite(ctx context.Context, req *logical.Request,
 	return nil, nil
 }
 
-type rootConfig struct {
+type config struct {
 	PrivateKey string `json:"private_key"`
 	PublicKey  string `json:"public_key"`
 }
 
-const pathConfigRootHelpSyn = `
-Configure the root credentials that are used to manage Database Users.
+const pathConfigHelpSyn = `
+Configure the  credentials that are used to manage Database Users.
 `
 
-const pathConfigRootHelpDesc = `
+const pathConfigHelpDesc = `
 Before doing anything, the Atlas backend needs credentials that are able
 to manage databaseusers, access keys, etc. This endpoint is used to 
 configure those credentials.
