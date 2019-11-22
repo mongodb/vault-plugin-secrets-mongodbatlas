@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
@@ -31,7 +32,7 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 	}
 }
 
-func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry, lease *configLease) (*logical.Response, error) {
+func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry) (*logical.Response, error) {
 
 	apiKeyDescription := genUsername(displayName)
 	client, err := b.clientMongo(ctx, s)
@@ -79,8 +80,10 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		"organizationid":       cred.OrganizationID,
 	})
 
-	resp.Secret.TTL = lease.TTL
-	resp.Secret.MaxTTL = lease.MaxTTL
+	defaultLease, maxLease := b.getDefaultAndMaxLease()
+
+	resp.Secret.TTL = defaultLease
+	resp.Secret.MaxTTL = maxLease
 
 	return resp, nil
 }
@@ -281,16 +284,22 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 
 func (b *Backend) programmaticAPIKeysRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	// Get the lease (if any)
-	leaseConfig, err := b.leaseConfig(ctx, req.Storage)
-	if err != nil {
-		return nil, err
-	}
-	if leaseConfig == nil {
-		leaseConfig = &configLease{}
-	}
+
+	defaultLease, maxLease := b.getDefaultAndMaxLease()
 
 	resp := &logical.Response{Secret: req.Secret}
-	resp.Secret.TTL = leaseConfig.TTL
-	resp.Secret.MaxTTL = leaseConfig.MaxTTL
+	resp.Secret.TTL = defaultLease
+	resp.Secret.MaxTTL = maxLease
 	return resp, nil
+}
+
+func (b *Backend) getDefaultAndMaxLease() (time.Duration, time.Duration) {
+	maxLease := b.Backend.System().MaxLeaseTTL()
+	defaultLease := b.Backend.System().DefaultLeaseTTL()
+
+	if defaultLease > maxLease {
+		maxLease = defaultLease
+	}
+	return defaultLease, maxLease
+
 }
