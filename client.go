@@ -41,7 +41,6 @@ func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Clie
 
 	config, err := getRootConfig(ctx, s)
 
-
 	transport := digest.NewTransport(config.PublicKey, config.PrivateKey)
 
 	if err != nil {
@@ -69,7 +68,7 @@ func getRootConfig(ctx context.Context, s logical.Storage) (*rootConfig, error) 
 		}
 
 		// return the config, we are done
-		return config, nil
+		return &config, nil
 
 	}
 
