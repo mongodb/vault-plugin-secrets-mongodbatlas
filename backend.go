@@ -90,5 +90,14 @@ func (b *Backend) leaseConfig(ctx context.Context, s logical.Storage) (*configLe
 	return &result, nil
 }
 
-const backendHelp = ``
+const backendHelp = `
+The MongoDB Atlas backend dynamically generates API keys for a set of 
+Organization or Project roles. The API keys have a configurable lease 
+set and are automatically revoked at the end of the lease.
+
+After mounting this backend, the Public and Private keys to generate 
+API keys must be configured with the "config" path and roles must be 
+written  using the "roles/" endpoints before any API keys can be generated.
+
+`
 const minUserRollbackAge = 5 * time.Minute
