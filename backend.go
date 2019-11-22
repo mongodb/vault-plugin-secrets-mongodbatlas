@@ -39,7 +39,6 @@ func NewBackend() *Backend {
 			pathRoles(&b),
 			pathConfigRoot(&b),
 			pathCredentials(&b),
-			pathConfigLease(&b),
 		},
 
 		Secrets: []*framework.Secret{
@@ -70,24 +69,6 @@ func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) erro
 	b.logger = config.Logger
 	b.system = config.System
 	return nil
-}
-
-// LeaseConfig returns the lease configuration
-func (b *Backend) leaseConfig(ctx context.Context, s logical.Storage) (*configLease, error) {
-	entry, err := s.Get(ctx, "config/lease")
-	if err != nil {
-		return nil, err
-	}
-	if entry == nil {
-		return nil, nil
-	}
-
-	var result configLease
-	if err := entry.DecodeJSON(&result); err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }
 
 const backendHelp = `
