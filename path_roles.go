@@ -42,7 +42,7 @@ func pathRoles(b *Backend) *framework.Path {
 			},
 			"project_roles": {
 				Type:        framework.TypeCommaStringSlice,
-				Description: fmt.Sprintf("Roles assigned when an %s API Key is assiged to a %s API key", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
+				Description: fmt.Sprintf("Roles assigned when an %s API Key is assigned to a %s API key", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
 			"ttl": {
 				Type:        framework.TypeDurationSecond,
