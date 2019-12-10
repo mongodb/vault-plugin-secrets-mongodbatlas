@@ -15,32 +15,32 @@ func pathRoles(b *Backend) *framework.Path {
 	return &framework.Path{
 		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
-			"name": &framework.FieldSchema{
+			"name": {
 				Type:        framework.TypeString,
 				Description: "Name of the Roles",
 			},
-			"project_id": &framework.FieldSchema{
+			"project_id": {
 				Type:        framework.TypeString,
 				Description: fmt.Sprintf("Project ID the %s API key belongs to.", projectProgrammaticAPIKey),
 			},
-			"roles": &framework.FieldSchema{
+			"roles": {
 				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("List of roles that the API Key should be granted. A minimum of one role must be provided. Any roles provided must be valid for the assigned Project, required for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 				Required:    true,
 			},
-			"organization_id": &framework.FieldSchema{
+			"organization_id": {
 				Type:        framework.TypeString,
 				Description: fmt.Sprintf("Organization ID required for an %s API key", orgProgrammaticAPIKey),
 			},
-			"ip_addresses": &framework.FieldSchema{
+			"ip_addresses": {
 				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("IP address to be added to the whitelist for the API key. Optional for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
-			"cidr_blocks": &framework.FieldSchema{
+			"cidr_blocks": {
 				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("Whitelist entry in CIDR notation to be added for the API key. Optional for %s and %s keys.", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
-			"project_roles": &framework.FieldSchema{
+			"project_roles": {
 				Type:        framework.TypeCommaStringSlice,
 				Description: fmt.Sprintf("Roles assigned when an %s API Key is assiged to a %s API key", orgProgrammaticAPIKey, projectProgrammaticAPIKey),
 			},
@@ -251,8 +251,8 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"cidr_blocks":     r.CIDRBlocks,
 		"ip_addresses":    r.IPAddresses,
 		"project_roles":   r.ProjectRoles,
-		"ttl":             r.TTL.String(),
-		"max_ttl":         r.MaxTTL.String(),
+		"ttl":             r.TTL.Seconds(),
+		"max_ttl":         r.MaxTTL.Seconds(),
 	}
 	return respData
 }
