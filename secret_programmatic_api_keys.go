@@ -82,6 +82,15 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 
 	defaultLease, maxLease := b.getDefaultAndMaxLease()
 
+	// If defined, credential TTL overrides default lease configuration
+	if cred.TTL > 0 {
+		defaultLease = cred.TTL
+	}
+
+	if cred.MaxTTL > 0 {
+		maxLease = cred.MaxTTL
+	}
+
 	resp.Secret.TTL = defaultLease
 	resp.Secret.MaxTTL = maxLease
 
@@ -294,8 +303,8 @@ func (b *Backend) programmaticAPIKeysRenew(ctx context.Context, req *logical.Req
 }
 
 func (b *Backend) getDefaultAndMaxLease() (time.Duration, time.Duration) {
-	maxLease := b.Backend.System().MaxLeaseTTL()
-	defaultLease := b.Backend.System().DefaultLeaseTTL()
+	maxLease := b.system.MaxLeaseTTL()
+	defaultLease := b.system.DefaultLeaseTTL()
 
 	if defaultLease > maxLease {
 		maxLease = defaultLease
