@@ -3,6 +3,7 @@ module github.com/hashicorp/vault-plugin-secrets-mongodbatlas
 go 1.12
 
 require (
+	9fans.net/go v0.0.2
 	github.com/Sectorbob/mlab-ns2 v0.0.0-20171030222938-d3aa0c295a8a
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/go-test/deep v1.0.2 // indirect
