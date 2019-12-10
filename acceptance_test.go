@@ -151,10 +151,13 @@ func TestAcceptanceProgrammaticAPIKey_WithTTL(t *testing.T) {
 
 func newAcceptanceTestEnv() (*testEnv, error) {
 	ctx := context.Background()
+
+	maxLease, _ := time.ParseDuration("60s")
+	defaultLease, _ := time.ParseDuration("30s")
 	conf := &logical.BackendConfig{
 		System: &logical.StaticSystemView{
-			DefaultLeaseTTLVal: time.Hour,
-			MaxLeaseTTLVal:     time.Hour,
+			DefaultLeaseTTLVal: defaultLease,
+			MaxLeaseTTLVal:     maxLease,
 		},
 		Logger: logging.NewVaultLogger(log.Debug),
 	}
