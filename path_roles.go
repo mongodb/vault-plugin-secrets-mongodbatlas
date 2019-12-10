@@ -1,9 +1,7 @@
 package mongodbatlas
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -107,9 +105,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		credentialEntry.OrganizationID = organizatioID
 	}
 
-	if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
-		resp.AddWarning(fmt.Sprintf("%s", err))
-	}
+	getAPIWhitelistArgs(credentialEntry, d)
 
 	if projectIDRaw, ok := d.GetOk("project_id"); ok {
 		projectID := projectIDRaw.(string)
@@ -123,14 +119,14 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
 		credentialEntry.Roles = programmaticKeyRolesRaw.([]string)
 	} else {
-		return logical.ErrorResponse(fmt.Sprintf("%s is required for %s and %s keys", "roles", orgProgrammaticAPIKey, projectProgrammaticAPIKey)), nil
+		return logical.ErrorResponse("%s is required for %s and %s keys", "roles", orgProgrammaticAPIKey, projectProgrammaticAPIKey), nil
 	}
 
 	if projectRolesRaw, ok := d.GetOk("project_roles"); ok {
 		credentialEntry.ProjectRoles = projectRolesRaw.([]string)
 	} else {
 		if isAssignedToProject(credentialEntry.OrganizationID, credentialEntry.ProjectID) {
-			return logical.ErrorResponse(fmt.Sprintf("%s is required if both %s and %s are supplied", "roles", "organization_id", "project_id")), nil
+			return logical.ErrorResponse("%s is required if both %s and %s are supplied", "roles", "organization_id", "project_id"), nil
 		}
 	}
 
@@ -154,7 +150,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 	return &resp, nil
 }
 
-func getAPIWhitelistArgs(credentialEntry *atlasCredentialEntry, d *framework.FieldData) error {
+func getAPIWhitelistArgs(credentialEntry *atlasCredentialEntry, d *framework.FieldData) {
 
 	if cidrBlocks, ok := d.GetOk("cidr_blocks"); ok {
 		credentialEntry.CIDRBlocks = cidrBlocks.([]string)
@@ -162,7 +158,6 @@ func getAPIWhitelistArgs(credentialEntry *atlasCredentialEntry, d *framework.Fie
 	if addresses, ok := d.GetOk("ip_addresses"); ok {
 		credentialEntry.IPAddresses = addresses.([]string)
 	}
-	return nil
 }
 
 func setAtlasCredential(ctx context.Context, s logical.Storage, credentialName string, credentialEntry *atlasCredentialEntry) error {
@@ -251,12 +246,6 @@ func (r atlasCredentialEntry) toResponseData() map[string]interface{} {
 		"max_ttl":         r.MaxTTL.Seconds(),
 	}
 	return respData
-}
-
-func compactJSON(input string) (string, error) {
-	var compacted bytes.Buffer
-	err := json.Compact(&compacted, []byte(input))
-	return compacted.String(), err
 }
 
 const pathRolesHelpSyn = `

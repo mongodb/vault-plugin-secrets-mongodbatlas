@@ -62,8 +62,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 			dbUserErr := errwrap.Wrapf("error creating programmaticAPIKey: {{err}}", err)
 			return nil, errwrap.Wrap(errwrap.Wrapf("failed to delete WAL entry: {{err}}", walErr), dbUserErr)
 		}
-		return logical.ErrorResponse(fmt.Sprintf(
-			"Error creating programmatic api key: %s", err)), err
+		return logical.ErrorResponse("Error creating programmatic api key: %s", err), err
 	}
 
 	if err := framework.DeleteWAL(ctx, s, walID); err != nil {
