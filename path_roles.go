@@ -46,11 +46,11 @@ func pathRoles(b *Backend) *framework.Path {
 			},
 			"ttl": {
 				Type:        framework.TypeDurationSecond,
-				Description: `Duration in seconds after which the issued token should expire. Defaults to 0, in which case the value will fallback to the system/mount defaults.`,
+				Description: `Duration in seconds after which the issued credential should expire. Defaults to 0, in which case the value will fallback to the system/mount defaults.`,
 			},
 			"max_ttl": {
 				Type:        framework.TypeDurationSecond,
-				Description: "The maximum allowed lifetime of tokens issued using this role.",
+				Description: "The maximum allowed lifetime of credentials issued using this role.",
 			},
 		},
 
@@ -102,8 +102,8 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		credentialEntry = &atlasCredentialEntry{}
 	}
 
-	if organizatioIDRaw, ok := d.GetOk("organization_id"); ok {
-		organizatioID := organizatioIDRaw.(string)
+	if organizationIDRaw, ok := d.GetOk("organization_id"); ok {
+		organizatioID := organizationIDRaw.(string)
 		credentialEntry.OrganizationID = organizatioID
 	}
 
@@ -118,10 +118,6 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 	if len(credentialEntry.OrganizationID) == 0 && len(credentialEntry.ProjectID) == 0 {
 		return logical.ErrorResponse("organization_id or project_id are required"), nil
-	}
-
-	if err = getAPIWhitelistArgs(credentialEntry, d); err != nil {
-		resp.AddWarning(fmt.Sprintf("%s", err))
 	}
 
 	if programmaticKeyRolesRaw, ok := d.GetOk("roles"); ok {
