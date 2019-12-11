@@ -119,17 +119,7 @@ func createProjectAPIKey(ctx context.Context, client *mongodbatlas.Client, apiKe
 			Desc:  apiKeyDescription,
 			Roles: credentialEntry.Roles,
 		})
-	if err != nil {
-		return nil, err
-	}
-	var orgIDs []string
-	for _, role := range key.Roles {
-		if len(role.OrgID) > 0 {
-			orgIDs = append(orgIDs, role.OrgID)
-		}
-	}
-
-	return key, nil
+	return key, err
 }
 
 func createAndAssigKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
