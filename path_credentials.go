@@ -2,6 +2,7 @@ package mongodbatlas
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"regexp"
@@ -16,9 +17,9 @@ func pathCredentials(b *Backend) *framework.Path {
 	return &framework.Path{
 		Pattern: "creds/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
-			"name": &framework.FieldSchema{
-				Type:        framework.TypeString,
-				Description: "Name of the user",
+			"name": {
+				Type:        framework.TypeLowerCaseString,
+				Description: "Name of the role",
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
@@ -38,6 +39,10 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 	cred, err := b.credentialRead(ctx, req.Storage, userName, true)
 	if err != nil {
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
+	}
+
+	if cred == nil {
+		return nil, errors.New("error retrieving credential: credential is nil")
 	}
 
 	return b.programmaticAPIKeyCreate(ctx, req.Storage, userName, cred)
