@@ -142,8 +142,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 		return logical.ErrorResponse("ttl exceeds max_ttl"), nil
 	}
 
-	err = setAtlasCredential(ctx, req.Storage, credentialName, credentialEntry)
-	if err != nil {
+	if err := setAtlasCredential(ctx, req.Storage, credentialName, credentialEntry); err != nil {
 		return nil, err
 	}
 

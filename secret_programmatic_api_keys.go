@@ -106,8 +106,7 @@ func createOrgKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescri
 		return nil, err
 	}
 
-	err = addWhitelistEntry(ctx, client, credentialEntry.OrganizationID, key.ID, credentialEntry)
-	if err != nil {
+	if err := addWhitelistEntry(ctx, client, credentialEntry.OrganizationID, key.ID, credentialEntry); err != nil {
 		return nil, err
 	}
 
@@ -139,10 +138,9 @@ func createAndAssigKey(ctx context.Context, client *mongodbatlas.Client, apiKeyD
 		return nil, err
 	}
 
-	_, err = client.ProjectAPIKeys.Assign(context.Background(), credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
+	if _, err = client.ProjectAPIKeys.Assign(context.Background(), credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
 		Roles: credentialEntry.ProjectRoles,
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
@@ -157,8 +155,7 @@ func addWhitelistEntry(ctx context.Context, client *mongodbatlas.Client, orgID s
 				CidrBlock: cidrBlock,
 			}
 		}
-		_, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, cidrBlocks)
-		if err != nil {
+		if _, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, cidrBlocks); err != nil {
 			return err
 		}
 	}
@@ -170,8 +167,7 @@ func addWhitelistEntry(ctx context.Context, client *mongodbatlas.Client, orgID s
 				IPAddress: ipAddress,
 			}
 		}
-		_, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, ipAddresses)
-		if err != nil {
+		if _, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, ipAddresses); err != nil {
 			return err
 		}
 	}
@@ -216,8 +212,7 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	}
 
 	// Use the user rollback mechanism to delete this database_user
-	err := b.pathProgrammaticAPIKeyRollback(ctx, req, programmaticAPIKey, data)
-	if err != nil {
+	if err := b.pathProgrammaticAPIKeyRollback(ctx, req, programmaticAPIKey, data); err != nil {
 		return nil, err
 	}
 	return nil, nil
