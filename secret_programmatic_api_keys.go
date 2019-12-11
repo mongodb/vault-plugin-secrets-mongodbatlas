@@ -50,11 +50,11 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 
 	switch {
 	case isOrgKey(cred.OrganizationID, cred.ProjectID):
-		key, err = createOrgKey(client, apiKeyDescription, cred)
+		key, err = createOrgKey(ctx, client, apiKeyDescription, cred)
 	case isProjectKey(cred.OrganizationID, cred.ProjectID):
-		key, err = createProjectAPIKey(client, apiKeyDescription, cred)
+		key, err = createProjectAPIKey(ctx, client, apiKeyDescription, cred)
 	case isAssignedToProject(cred.OrganizationID, cred.ProjectID):
-		key, err = createAndAssigKey(client, apiKeyDescription, cred)
+		key, err = createAndAssigKey(ctx, client, apiKeyDescription, cred)
 	}
 
 	if err != nil {
@@ -96,8 +96,8 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	return resp, nil
 }
 
-func createOrgKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
-	key, _, err := client.APIKeys.Create(context.Background(), credentialEntry.OrganizationID,
+func createOrgKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.APIKeys.Create(ctx, credentialEntry.OrganizationID,
 		&mongodbatlas.APIKeyInput{
 			Desc:  apiKeyDescription,
 			Roles: credentialEntry.Roles,
@@ -106,7 +106,7 @@ func createOrgKey(client *mongodbatlas.Client, apiKeyDescription string, credent
 		return nil, err
 	}
 
-	err = addWhitelistEntry(client, credentialEntry.OrganizationID, key.ID, credentialEntry)
+	err = addWhitelistEntry(ctx, client, credentialEntry.OrganizationID, key.ID, credentialEntry)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +114,8 @@ func createOrgKey(client *mongodbatlas.Client, apiKeyDescription string, credent
 	return key, nil
 }
 
-func createProjectAPIKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
-	key, _, err := client.ProjectAPIKeys.Create(context.Background(), credentialEntry.ProjectID,
+func createProjectAPIKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, _, err := client.ProjectAPIKeys.Create(ctx, credentialEntry.ProjectID,
 		&mongodbatlas.APIKeyInput{
 			Desc:  apiKeyDescription,
 			Roles: credentialEntry.Roles,
@@ -133,8 +133,8 @@ func createProjectAPIKey(client *mongodbatlas.Client, apiKeyDescription string, 
 	return key, nil
 }
 
-func createAndAssigKey(client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
-	key, err := createOrgKey(client, apiKeyDescription, credentialEntry)
+func createAndAssigKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+	key, err := createOrgKey(ctx, client, apiKeyDescription, credentialEntry)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func createAndAssigKey(client *mongodbatlas.Client, apiKeyDescription string, cr
 	return key, nil
 }
 
-func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
+func addWhitelistEntry(ctx context.Context, client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
 	if len(cred.CIDRBlocks) > 0 {
 		cidrBlocks := make([]*mongodbatlas.WhitelistAPIKeysReq, len(cred.CIDRBlocks))
 		for i, cidrBlock := range cred.CIDRBlocks {
@@ -157,7 +157,7 @@ func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, 
 				CidrBlock: cidrBlock,
 			}
 		}
-		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, cidrBlocks)
+		_, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, cidrBlocks)
 		if err != nil {
 			return err
 		}
@@ -170,7 +170,7 @@ func addWhitelistEntry(client *mongodbatlas.Client, orgID string, keyID string, 
 				IPAddress: ipAddress,
 			}
 		}
-		_, _, err := client.WhitelistAPIKeys.Create(context.Background(), orgID, keyID, ipAddresses)
+		_, _, err := client.WhitelistAPIKeys.Create(ctx, orgID, keyID, ipAddresses)
 		if err != nil {
 			return err
 		}
@@ -239,7 +239,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 	switch {
 	case isOrgKey(entry.OrganizationID, entry.ProjectID):
 		// check if the user exists or not
-		_, res, err := client.APIKeys.Get(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		_, res, err := client.APIKeys.Get(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		// if the user is gone, move along
 		if err != nil {
 			if res != nil && res.StatusCode == http.StatusNotFound {
@@ -249,7 +249,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		}
 
 		// now, delete the api key
-		res, err = client.APIKeys.Delete(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		res, err = client.APIKeys.Delete(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		if err != nil {
 			if res != nil && res.StatusCode == http.StatusNotFound {
 				return nil
@@ -258,7 +258,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		}
 	case isProjectKey(entry.OrganizationID, entry.ProjectID):
 		// now, delete the user
-		res, err := client.ProjectAPIKeys.Unassign(context.Background(), entry.ProjectID, entry.ProgrammaticAPIKeyID)
+		res, err := client.ProjectAPIKeys.Unassign(ctx, entry.ProjectID, entry.ProgrammaticAPIKeyID)
 		if err != nil {
 			if res != nil && res.StatusCode == http.StatusNotFound {
 				return nil
@@ -267,7 +267,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		}
 	case isAssignedToProject(entry.OrganizationID, entry.ProjectID):
 		// check if the user exists or not
-		_, res, err := client.APIKeys.Get(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		_, res, err := client.APIKeys.Get(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		// if the user is gone, move along
 		if err != nil {
 			if res != nil && res.StatusCode == http.StatusNotFound {
@@ -277,7 +277,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		}
 
 		// now, delete the api key
-		res, err = client.APIKeys.Delete(context.Background(), entry.OrganizationID, entry.ProgrammaticAPIKeyID)
+		res, err = client.APIKeys.Delete(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		if err != nil {
 			if res != nil && res.StatusCode == http.StatusNotFound {
 				return nil
