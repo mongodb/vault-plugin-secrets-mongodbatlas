@@ -34,7 +34,10 @@ func programmaticAPIKeys(b *Backend) *framework.Secret {
 
 func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storage, displayName string, cred *atlasCredentialEntry) (*logical.Response, error) {
 
-	apiKeyDescription := genUsername(displayName)
+	apiKeyDescription, err := genUsername(displayName)
+	if err != nil {
+		return nil, errwrap.Wrapf("error generating username: {{err}}", err)
+	}
 	client, err := b.clientMongo(ctx, s)
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
