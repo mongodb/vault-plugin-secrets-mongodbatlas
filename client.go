@@ -11,19 +11,8 @@ import (
 )
 
 func (b *Backend) clientMongo(ctx context.Context, s logical.Storage) (*mongodbatlas.Client, error) {
-	b.clientMutex.RLock()
-	if b.client != nil {
-		b.clientMutex.RUnlock()
-		return b.client, nil
-	}
 
-	// Upgrade the lock for writing
-	b.clientMutex.RUnlock()
-	b.clientMutex.Lock()
-	defer b.clientMutex.Unlock()
-
-	// check client again, in the event that a client was being created while we
-	// waited for Lock()
+	// If client is already created, just return it
 	if b.client != nil {
 		return b.client, nil
 	}

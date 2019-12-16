@@ -55,8 +55,6 @@ func NewBackend() *Backend {
 type Backend struct {
 	*framework.Backend
 
-	// Mutex to protect access to client and client config
-	clientMutex     sync.RWMutex
 	credentialMutex sync.RWMutex
 
 	client *mongodbatlas.Client

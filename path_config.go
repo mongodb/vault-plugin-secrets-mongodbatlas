@@ -30,9 +30,6 @@ func pathConfig(b *Backend) *framework.Path {
 
 func (b *Backend) pathConfigWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 
-	b.clientMutex.Lock()
-	defer b.clientMutex.Unlock()
-
 	entry, err := logical.StorageEntryJSON("config", config{
 		PublicKey:  data.Get("public_key").(string),
 		PrivateKey: data.Get("private_key").(string),
