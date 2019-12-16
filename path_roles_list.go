@@ -21,8 +21,6 @@ func pathRolesList(b *Backend) *framework.Path {
 }
 
 func (b *Backend) pathRolesList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	b.credentialMutex.RLock()
-	defer b.credentialMutex.RUnlock()
 	entries, err := req.Storage.List(ctx, "roles/")
 	if err != nil {
 		return nil, err
