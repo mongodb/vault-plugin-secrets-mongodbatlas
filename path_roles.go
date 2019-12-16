@@ -14,7 +14,7 @@ func pathRoles(b *Backend) *framework.Path {
 		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": {
-				Type:        framework.TypeString,
+				Type:        framework.TypeLowerCaseString,
 				Description: "Name of the Roles",
 			},
 			"project_id": {
