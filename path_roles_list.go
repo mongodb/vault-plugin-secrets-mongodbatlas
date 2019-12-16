@@ -29,5 +29,5 @@ func (b *Backend) pathRolesList(ctx context.Context, req *logical.Request, d *fr
 	return logical.ListResponse(entries), nil
 }
 
-const pathRolesListHelpSyn = ``
-const pathRolesListHelpDesc = ``
+const pathRolesListHelpSyn = `List the existing roles in this backend`
+const pathRolesListHelpDesc = `Roles will be listed by the role name.`
