@@ -140,7 +140,6 @@ func TestAcceptanceProgrammaticAPIKey_WithTTL(t *testing.T) {
 	}
 
 	t.Run("add config", acceptanceTestEnv.AddConfig)
-	t.Run("add config", acceptanceTestEnv.AddLeaseConfig)
 	t.Run("add programmatic API Key role with TTL", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithTTL)
 	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
 	t.Run("check lease for programmatic API key cred", acceptanceTestEnv.CheckLease)
