@@ -2,6 +2,7 @@ package mongodbatlas
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -66,6 +67,10 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 			return nil, errwrap.Wrap(errwrap.Wrapf("failed to delete WAL entry: {{err}}", walErr), dbUserErr)
 		}
 		return logical.ErrorResponse("Error creating programmatic api key: %s", err), err
+	}
+
+	if key == nil {
+		return nil, errors.New("error creating credential")
 	}
 
 	if err := framework.DeleteWAL(ctx, s, walID); err != nil {
