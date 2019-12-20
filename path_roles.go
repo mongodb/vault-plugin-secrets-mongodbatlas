@@ -101,8 +101,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 	}
 
 	if organizationIDRaw, ok := d.GetOk("organization_id"); ok {
-		organizatioID := organizationIDRaw.(string)
-		credentialEntry.OrganizationID = organizatioID
+		credentialEntry.OrganizationID = organizationIDRaw.(string)
 	}
 
 	getAPIWhitelistArgs(credentialEntry, d)

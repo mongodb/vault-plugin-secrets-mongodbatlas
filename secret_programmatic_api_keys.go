@@ -58,7 +58,7 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 	case isProjectKey(cred.OrganizationID, cred.ProjectID):
 		key, err = createProjectAPIKey(ctx, client, apiKeyDescription, cred)
 	case isAssignedToProject(cred.OrganizationID, cred.ProjectID):
-		key, err = createAndAssigKey(ctx, client, apiKeyDescription, cred)
+		key, err = createAndAssignKey(ctx, client, apiKeyDescription, cred)
 	}
 
 	if err != nil {
@@ -130,13 +130,13 @@ func createProjectAPIKey(ctx context.Context, client *mongodbatlas.Client, apiKe
 	return key, err
 }
 
-func createAndAssigKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
+func createAndAssignKey(ctx context.Context, client *mongodbatlas.Client, apiKeyDescription string, credentialEntry *atlasCredentialEntry) (*mongodbatlas.APIKey, error) {
 	key, err := createOrgKey(ctx, client, apiKeyDescription, credentialEntry)
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err = client.ProjectAPIKeys.Assign(context.Background(), credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
+	if _, err := client.ProjectAPIKeys.Assign(ctx, credentialEntry.ProjectID, key.ID, &mongodbatlas.AssignAPIKey{
 		Roles: credentialEntry.ProjectRoles,
 	}); err != nil {
 		return nil, err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"regexp"
 
 	"github.com/hashicorp/errwrap"
@@ -66,7 +65,7 @@ func genUsername(displayName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	ret := fmt.Sprintf("vault-%s%s-%d", midString, id, rand.Int31n(10000))
+	ret := fmt.Sprintf("vault-%s-%s", midString, id)
 	return ret, nil
 }
 
