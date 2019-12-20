@@ -37,7 +37,7 @@ func pathCredentials(b *Backend) *framework.Path {
 func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	userName := d.Get("name").(string)
 
-	cred, err := b.credentialRead(ctx, req.Storage, userName, true)
+	cred, err := b.credentialRead(ctx, req.Storage, userName)
 	if err != nil {
 		return nil, errwrap.Wrapf("error retrieving credential: {{err}}", err)
 	}

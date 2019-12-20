@@ -69,7 +69,7 @@ func (b *Backend) pathRolesDelete(ctx context.Context, req *logical.Request, d *
 }
 
 func (b *Backend) pathRolesRead(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	entry, err := b.credentialRead(ctx, req.Storage, d.Get("name").(string), true)
+	entry, err := b.credentialRead(ctx, req.Storage, d.Get("name").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (b *Backend) pathRolesWrite(ctx context.Context, req *logical.Request, d *f
 
 	b.credentialMutex.Lock()
 	defer b.credentialMutex.Unlock()
-	credentialEntry, err := b.credentialRead(ctx, req.Storage, credentialName, false)
+	credentialEntry, err := b.credentialRead(ctx, req.Storage, credentialName)
 	if err != nil {
 		return nil, err
 	}
@@ -179,17 +179,12 @@ func setAtlasCredential(ctx context.Context, s logical.Storage, credentialName s
 
 }
 
-func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credentialName string, shouldLock bool) (*atlasCredentialEntry, error) {
+func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credentialName string) (*atlasCredentialEntry, error) {
 	if credentialName == "" {
 		return nil, fmt.Errorf("missing credential name")
 	}
-	if shouldLock {
-		b.credentialMutex.RLock()
-	}
+
 	entry, err := s.Get(ctx, "roles/"+credentialName)
-	if shouldLock {
-		b.credentialMutex.RUnlock()
-	}
 	if err != nil {
 		return nil, err
 	}
