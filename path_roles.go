@@ -201,21 +201,6 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 		return &credentialEntry, nil
 	}
 
-	if shouldLock {
-		b.credentialMutex.Lock()
-		defer b.credentialMutex.Unlock()
-	}
-	entry, err = s.Get(ctx, "roles/"+credentialName)
-	if err != nil {
-		return nil, err
-	}
-
-	if entry != nil {
-		if err := entry.DecodeJSON(&credentialEntry); err != nil {
-			return nil, err
-		}
-		return &credentialEntry, nil
-	}
 	return &credentialEntry, nil
 }
 
