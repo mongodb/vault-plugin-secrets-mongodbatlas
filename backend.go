@@ -56,6 +56,7 @@ type Backend struct {
 	*framework.Backend
 
 	credentialMutex sync.RWMutex
+	clientMutex     sync.RWMutex
 
 	client *mongodbatlas.Client
 

@@ -11,8 +11,10 @@ import (
 )
 
 func (b *Backend) clientMongo(ctx context.Context, s logical.Storage) (*mongodbatlas.Client, error) {
+	b.clientMutex.Lock()
+	defer b.clientMutex.Unlock()
 
-	// If client is already created, just return it
+	// if the client is already created, just return it
 	if b.client != nil {
 		return b.client, nil
 	}
