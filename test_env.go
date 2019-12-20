@@ -172,6 +172,27 @@ func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDR(t *testing.T) {
 	}
 }
 
+func (e *testEnv) AddProgrammaticAPIKeyRoleWithCIDRAndIP(t *testing.T) {
+	roles := []string{"ORG_MEMBER"}
+	cidrBlocks := []string{"179.154.224.2/32"}
+	ips := []string{"192.168.1.1", "192.168.1.2"}
+	req := &logical.Request{
+		Operation: logical.UpdateOperation,
+		Path:      "roles/test-programmatic-key",
+		Storage:   e.Storage,
+		Data: map[string]interface{}{
+			"organization_id": e.OrganizationID,
+			"roles":           roles,
+			"cidr_blocks":     cidrBlocks,
+			"ip_addresses":    ips,
+		},
+	}
+	resp, err := e.Backend.HandleRequest(e.Context, req)
+	if err != nil || (resp != nil && resp.IsError()) {
+		t.Fatalf("bad: resp: %#v\nerr:%v", resp, err)
+	}
+}
+
 func (e *testEnv) AddProgrammaticAPIKeyRoleWithProjectID(t *testing.T) {
 	roles := []string{"ORG_MEMBER"}
 	req := &logical.Request{

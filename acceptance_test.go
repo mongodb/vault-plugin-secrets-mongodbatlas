@@ -111,6 +111,24 @@ func TestAcceptanceProgrammaticAPIKey_WithCIDRWhitelist(t *testing.T) {
 
 }
 
+func TestAcceptanceProgrammaticAPIKey_WithCIDRAndIPWhitelist(t *testing.T) {
+	if !runAcceptanceTests {
+		t.SkipNow()
+	}
+
+	acceptanceTestEnv, err := newAcceptanceTestEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("add config", acceptanceTestEnv.AddConfig)
+	t.Run("add programmatic API Key role", acceptanceTestEnv.AddProgrammaticAPIKeyRoleWithCIDRAndIP)
+	t.Run("read programmatic API key cred", acceptanceTestEnv.ReadProgrammaticAPIKeyRule)
+	t.Run("renew programmatic API key creds", acceptanceTestEnv.RenewProgrammaticAPIKeys)
+	t.Run("revoke programmatic API key creds", acceptanceTestEnv.RevokeProgrammaticAPIKeys)
+
+}
+
 func TestAcceptanceProgrammaticAPIKey_AssignToProject(t *testing.T) {
 	if !runAcceptanceTests {
 		t.SkipNow()
