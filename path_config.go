@@ -2,6 +2,7 @@ package mongodbatlas
 
 import (
 	"context"
+	"errors"
 
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -29,10 +30,19 @@ func pathConfig(b *Backend) *framework.Path {
 }
 
 func (b *Backend) pathConfigWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	publicKey := data.Get("public_key").(string)
+	if publicKey == "" {
+		return nil, errors.New("public_key is empty")
+	}
+
+	privateKey := data.Get("private_key").(string)
+	if privateKey == "" {
+		return nil, errors.New("private_key is empty")
+	}
 
 	entry, err := logical.StorageEntryJSON("config", config{
-		PublicKey:  data.Get("public_key").(string),
-		PrivateKey: data.Get("private_key").(string),
+		PublicKey:  publicKey,
+		PrivateKey: privateKey,
 	})
 	if err != nil {
 		return nil, err
