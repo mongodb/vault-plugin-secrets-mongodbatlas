@@ -146,24 +146,20 @@ func createAndAssignKey(ctx context.Context, client *mongodbatlas.Client, apiKey
 }
 
 func addWhitelistEntry(ctx context.Context, client *mongodbatlas.Client, orgID string, keyID string, cred *atlasCredentialEntry) error {
-	entries := []*mongodbatlas.WhitelistAPIKeysReq{}
-	if len(cred.CIDRBlocks) > 0 {
-		for _, cidrBlock := range cred.CIDRBlocks {
-			cidr := &mongodbatlas.WhitelistAPIKeysReq{
-				CidrBlock: cidrBlock,
-			}
-			entries = append(entries, cidr)
+	var entries []*mongodbatlas.WhitelistAPIKeysReq
+	for _, cidrBlock := range cred.CIDRBlocks {
+		cidr := &mongodbatlas.WhitelistAPIKeysReq{
+			CidrBlock: cidrBlock,
 		}
+		entries = append(entries, cidr)
 	}
 
-	if len(cred.IPAddresses) > 0 {
-		for _, ipAddress := range cred.IPAddresses {
-			ip := &mongodbatlas.WhitelistAPIKeysReq{
-				IPAddress: ipAddress,
-			}
-			entries = append(entries, ip)
-
+	for _, ipAddress := range cred.IPAddresses {
+		ip := &mongodbatlas.WhitelistAPIKeysReq{
+			IPAddress: ipAddress,
 		}
+		entries = append(entries, ip)
+
 	}
 
 	if entries != nil {
