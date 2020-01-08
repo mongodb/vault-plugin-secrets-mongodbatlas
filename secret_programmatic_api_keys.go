@@ -14,7 +14,7 @@ import (
 	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
-func programmaticAPIKeys(b *Backend) *framework.Secret {
+func (b *Backend) programmaticAPIKeys() *framework.Secret {
 	return &framework.Secret{
 		Type: programmaticAPIKey,
 		Fields: map[string]*framework.FieldSchema{

@@ -35,14 +35,14 @@ func NewBackend() *Backend {
 		},
 
 		Paths: []*framework.Path{
-			pathRolesList(&b),
-			pathRoles(&b),
-			pathConfig(&b),
-			pathCredentials(&b),
+			b.pathRolesList(),
+			b.pathRoles(),
+			b.pathConfig(),
+			b.pathCredentials(),
 		},
 
 		Secrets: []*framework.Secret{
-			programmaticAPIKeys(&b),
+			b.programmaticAPIKeys(),
 		},
 
 		WALRollbackMinAge: minUserRollbackAge,

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathRoles(b *Backend) *framework.Path {
+func (b *Backend) pathRoles() *framework.Path {
 	return &framework.Path{
 		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathConfig(b *Backend) *framework.Path {
+func (b *Backend) pathConfig() *framework.Path {
 	return &framework.Path{
 		Pattern: "config",
 		Fields: map[string]*framework.FieldSchema{

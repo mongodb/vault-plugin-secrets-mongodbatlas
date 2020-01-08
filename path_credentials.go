@@ -14,7 +14,7 @@ import (
 
 var displayNameRegex = regexp.MustCompile("[^a-zA-Z0-9+=,.@_-]")
 
-func pathCredentials(b *Backend) *framework.Path {
+func (b *Backend) pathCredentials() *framework.Path {
 	return &framework.Path{
 		Pattern: "creds/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
