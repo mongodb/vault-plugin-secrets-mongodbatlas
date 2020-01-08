@@ -12,13 +12,18 @@ func (b *Backend) pathConfig() *framework.Path {
 	return &framework.Path{
 		Pattern: "config",
 		Fields: map[string]*framework.FieldSchema{
-			"public_key": &framework.FieldSchema{
+			"public_key": {
 				Type:        framework.TypeString,
 				Description: "MongoDB Atlas Programmatic Public Key",
+				Required:    true,
 			},
-			"private_key": &framework.FieldSchema{
+			"private_key": {
 				Type:        framework.TypeString,
 				Description: "MongoDB Atlas Programmatic Private Key",
+				Required:    true,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Sensitive: true,
+				},
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
