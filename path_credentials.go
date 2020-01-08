@@ -21,6 +21,7 @@ func (b *Backend) pathCredentials() *framework.Path {
 			"name": {
 				Type:        framework.TypeLowerCaseString,
 				Description: "Name of the role",
+				Required:    true,
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
