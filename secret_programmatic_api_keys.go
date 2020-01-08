@@ -18,12 +18,12 @@ func (b *Backend) programmaticAPIKeys() *framework.Secret {
 	return &framework.Secret{
 		Type: programmaticAPIKey,
 		Fields: map[string]*framework.FieldSchema{
-			"public_key": &framework.FieldSchema{
+			"public_key": {
 				Type:        framework.TypeString,
 				Description: "Programmatic API Key Public Key",
 			},
 
-			"private_key": &framework.FieldSchema{
+			"private_key": {
 				Type:        framework.TypeString,
 				Description: "Programmatic API Key Private Key",
 			},
@@ -82,9 +82,9 @@ func (b *Backend) programmaticAPIKeyCreate(ctx context.Context, s logical.Storag
 		"private_key": key.PrivateKey,
 		"description": apiKeyDescription,
 	}, map[string]interface{}{
-		"programmaticapikeyid": key.ID,
-		"projectid":            cred.ProjectID,
-		"organizationid":       cred.OrganizationID,
+		"programmatic_api_key_id": key.ID,
+		"project_id":              cred.ProjectID,
+		"organization_id":         cred.OrganizationID,
 	})
 
 	defaultLease, maxLease := b.getDefaultAndMaxLease()
@@ -173,7 +173,7 @@ func addWhitelistEntry(ctx context.Context, client *mongodbatlas.Client, orgID s
 
 func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 
-	programmaticAPIKeyIDRaw, ok := req.Secret.InternalData["programmaticapikeyid"]
+	programmaticAPIKeyIDRaw, ok := req.Secret.InternalData["programmatic_api_key_id"]
 	if !ok {
 		return nil, fmt.Errorf("secret is missing programmatic api key id internal data")
 	}
@@ -184,7 +184,7 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	}
 
 	organizationID := ""
-	organizationIDRaw, ok := req.Secret.InternalData["organizationid"]
+	organizationIDRaw, ok := req.Secret.InternalData["organization_id"]
 	if ok {
 		organizationID, ok = organizationIDRaw.(string)
 		if !ok {
@@ -193,7 +193,7 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	}
 
 	projectID := ""
-	projectIDRaw, ok := req.Secret.InternalData["projectid"]
+	projectIDRaw, ok := req.Secret.InternalData["project_id"]
 	if ok {
 		projectID, ok = projectIDRaw.(string)
 		if !ok {
@@ -202,9 +202,9 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 	}
 
 	var data = map[string]interface{}{
-		"organizationid":       organizationID,
-		"programmaticapikeyid": programmaticAPIKeyID,
-		"projectid":            projectID,
+		"organization_id":         organizationID,
+		"programmatic_api_key_id": programmaticAPIKeyID,
+		"project_id":              projectID,
 	}
 
 	// Use the user rollback mechanism to delete this database_user
