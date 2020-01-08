@@ -16,6 +16,7 @@ func (b *Backend) pathRoles() *framework.Path {
 			"name": {
 				Type:        framework.TypeLowerCaseString,
 				Description: "Name of the Roles",
+				Required:    true,
 			},
 			"project_id": {
 				Type:        framework.TypeString,
