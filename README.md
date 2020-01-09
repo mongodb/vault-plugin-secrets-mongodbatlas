@@ -101,8 +101,8 @@ Clone this repository:
 
 ```
 
-mkdir $GOPATH/src/github.com/hashicorp/vault-plugin-secrets-mongodbatlas`
-cd $GOPATH/src/github.com/hashicorp/
+mkdir $GOPATH/src/github.com/mongodb/vault-plugin-secrets-mongodbatlas`
+cd $GOPATH/src/github.com/mongodb/
 git clone git@github.com:mongodb/vault-plugin-secrets-mongodbatlas.git
 go mod download
 
@@ -162,25 +162,6 @@ $ vault secrets enable --plugin-name='vault-plugin-secrets-mongodbatlas' --path=
 
 ```
 
-#### Database Secrets Engine for MongoDB Atlas plugin
-
-The following steps are required to register the Database Secrets Engine for MongoDB Atlas plugin:
-
-```sh
-
-vault write sys/plugins/catalog/database/mongodbatlas-database-plugin \
-    sha256=$(shasum -a 256 mongodbatlas-database-plugin | cut -d' ' -f1) \
-    command="mongodbatlas-database-plugin"
-
-```
-
-Then, you must enable the Vault's Database Secret Engine with Vault
-
-```sh
-
-vault secrets enable database
-
-```
 
 ### Tests
 
@@ -190,10 +171,9 @@ The integration tests are run by `$ make test` and rather than firing real
 API calls, they fire API calls at a local test server that returns expected
 responses.
 
-The acceptance tests fire real API calls, and are located in `plugins/logical/mongodbatlas/acceptance_test.go`
-and `plugins/database/mongodbatlas/mongodbatlas_test.go`. These should be run
-once as a final step before placing a PR. Please see `acceptance_test.go` and
-`mongodbatlas_test.go` to learn the environment variables that will need to be set.
+The acceptance tests fire real API calls, and are located in `acceptance_test.go`. 
+These should be run once as a final step before placing a PR. Please see `acceptance_test.go` 
+to learn the environment variables that will need to be set.
 
 **Warning:** The acceptance tests create/destroy/modify *real resources*,
 which may incur real costs in some cases. In the presence of a bug,
