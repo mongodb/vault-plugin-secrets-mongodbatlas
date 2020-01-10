@@ -47,13 +47,13 @@ fi
 
 
 # The main method we need for building is in the cmd directory
-cd "${DIR}/cmd/${TOOL}"
+cd "${DIR}/cmd/"
 
 # Build!
 echo "==> Building..."
 gox \
     -osarch="${XC_OSARCH}" \
-    -ldflags "-X github.com/hashicorp/${TOOL}/version.GitCommit='${GIT_COMMIT}${GIT_DIRTY}'" \
+    -ldflags "-X github.com/mongodb/${TOOL}/version.GitCommit='${GIT_COMMIT}${GIT_DIRTY}'" \
     -output "${DIR}/pkg/{{.OS}}_{{.Arch}}/${TOOL}" \
     -tags="${BUILD_TAGS}" \
     .
