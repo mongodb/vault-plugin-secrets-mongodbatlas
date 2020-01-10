@@ -44,6 +44,7 @@ func NewBackend(system logical.SystemView) *Backend {
 			b.programmaticAPIKeys(),
 		},
 
+		WALRollback:       b.pathProgrammaticAPIKeyRollback,
 		WALRollbackMinAge: minUserRollbackAge,
 		BackendType:       logical.TypeLogical,
 	}
