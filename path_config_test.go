@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/go-test/deep"
-
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
@@ -15,7 +14,7 @@ func TestBackend_PathConfig(t *testing.T) {
 	config := logical.TestBackendConfig()
 	config.StorageView = &logical.InmemStorage{}
 
-	b := NewBackend()
+	b := NewBackend(config.System)
 	if err := b.Setup(context.Background(), config); err != nil {
 		t.Fatal(err)
 	}
