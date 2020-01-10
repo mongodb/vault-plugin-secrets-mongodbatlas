@@ -28,6 +28,7 @@ func (b *Backend) pathConfig() *framework.Path {
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.UpdateOperation: b.pathConfigWrite,
+			logical.ReadOperation:   b.pathConfigRead,
 		},
 		HelpSynopsis:    pathConfigHelpSyn,
 		HelpDescription: pathConfigHelpDesc,
@@ -61,6 +62,19 @@ func (b *Backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	b.client = nil
 
 	return nil, nil
+}
+
+func (b *Backend) pathConfigRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	cfg, err := getRootConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"public_key": cfg.PublicKey,
+		},
+	}, nil
 }
 
 type config struct {
