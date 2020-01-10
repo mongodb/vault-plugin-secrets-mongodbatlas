@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathRolesList(b *Backend) *framework.Path {
+func (b *Backend) pathRolesList() *framework.Path {
 	return &framework.Path{
 		Pattern: "roles/?$",
 
 		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.ListOperation: b.pathRolesList,
+			logical.ListOperation: b.operationListRoles,
 		},
 
 		HelpSynopsis:    pathRolesListHelpSyn,
@@ -20,7 +20,7 @@ func pathRolesList(b *Backend) *framework.Path {
 	}
 }
 
-func (b *Backend) pathRolesList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+func (b *Backend) operationListRoles(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	entries, err := req.Storage.List(ctx, "roles/")
 	if err != nil {
 		return nil, err

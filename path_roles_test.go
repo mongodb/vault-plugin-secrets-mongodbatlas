@@ -13,8 +13,9 @@ func TestBackend_PathListCredentials(t *testing.T) {
 	var err error
 	config := logical.TestBackendConfig()
 	config.StorageView = &logical.InmemStorage{}
+	config.System = logical.TestSystemView()
 
-	b := NewBackend()
+	b := NewBackend(config.System)
 	if err := b.Setup(context.Background(), config); err != nil {
 		t.Fatal(err)
 	}

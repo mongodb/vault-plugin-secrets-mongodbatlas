@@ -9,6 +9,8 @@
 *.dll
 *.so
 *.dylib
+pkg*
+bin*
 
 # Test binary, built with `go test -c`
 *.test
@@ -50,10 +52,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
-vault-plugin-secrets-mongodbatlas
-mongodbatlas-database-plugin
-vault*
 
 .idea/
 # End of https://www.gitignore.io/api/go,macos

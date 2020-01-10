@@ -9,13 +9,14 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathRoles(b *Backend) *framework.Path {
+func (b *Backend) pathRoles() *framework.Path {
 	return &framework.Path{
 		Pattern: "roles/" + framework.GenericNameRegex("name"),
 		Fields: map[string]*framework.FieldSchema{
 			"name": {
 				Type:        framework.TypeLowerCaseString,
 				Description: "Name of the Roles",
+				Required:    true,
 			},
 			"project_id": {
 				Type:        framework.TypeString,
@@ -195,8 +196,9 @@ func (b *Backend) credentialRead(ctx context.Context, s logical.Storage, credent
 		}
 		return &credentialEntry, nil
 	}
-
-	return &credentialEntry, nil
+	// Return nil here because all callers expect that if an entry
+	// is nil, the method will return nil, nil.
+	return nil, nil
 }
 
 type atlasCredentialEntry struct {

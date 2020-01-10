@@ -6,21 +6,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 )
 
 func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend, error) {
-	b := NewBackend()
+	b := NewBackend(conf.System)
 	if err := b.Setup(ctx, conf); err != nil {
 		return nil, err
 	}
 	return b, nil
 }
 
-func NewBackend() *Backend {
+func NewBackend(system logical.SystemView) *Backend {
 	var b Backend
 	b.Backend = &framework.Backend{
 		Help: strings.TrimSpace(backendHelp),
@@ -35,20 +34,20 @@ func NewBackend() *Backend {
 		},
 
 		Paths: []*framework.Path{
-			pathRolesList(&b),
-			pathRoles(&b),
-			pathConfig(&b),
-			pathCredentials(&b),
+			b.pathRolesList(),
+			b.pathRoles(),
+			b.pathConfig(),
+			b.pathCredentials(),
 		},
 
 		Secrets: []*framework.Secret{
-			programmaticAPIKeys(&b),
+			b.programmaticAPIKeys(),
 		},
 
 		WALRollbackMinAge: minUserRollbackAge,
 		BackendType:       logical.TypeLogical,
 	}
-
+	b.system = system
 	return &b
 }
 
@@ -60,14 +59,7 @@ type Backend struct {
 
 	client *mongodbatlas.Client
 
-	logger hclog.Logger
 	system logical.SystemView
-}
-
-func (b *Backend) Setup(ctx context.Context, config *logical.BackendConfig) error {
-	b.logger = config.Logger
-	b.system = config.System
-	return nil
 }
 
 const backendHelp = `
