@@ -8,21 +8,27 @@ import (
 	"github.com/hashicorp/vault/sdk/logical"
 )
 
-func pathConfig(b *Backend) *framework.Path {
+func (b *Backend) pathConfig() *framework.Path {
 	return &framework.Path{
 		Pattern: "config",
 		Fields: map[string]*framework.FieldSchema{
-			"public_key": &framework.FieldSchema{
+			"public_key": {
 				Type:        framework.TypeString,
 				Description: "MongoDB Atlas Programmatic Public Key",
+				Required:    true,
 			},
-			"private_key": &framework.FieldSchema{
+			"private_key": {
 				Type:        framework.TypeString,
 				Description: "MongoDB Atlas Programmatic Private Key",
+				Required:    true,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Sensitive: true,
+				},
 			},
 		},
 		Callbacks: map[logical.Operation]framework.OperationFunc{
 			logical.UpdateOperation: b.pathConfigWrite,
+			logical.ReadOperation:   b.pathConfigRead,
 		},
 		HelpSynopsis:    pathConfigHelpSyn,
 		HelpDescription: pathConfigHelpDesc,
@@ -56,6 +62,19 @@ func (b *Backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	b.client = nil
 
 	return nil, nil
+}
+
+func (b *Backend) pathConfigRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	cfg, err := getRootConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"public_key": cfg.PublicKey,
+		},
+	}, nil
 }
 
 type config struct {

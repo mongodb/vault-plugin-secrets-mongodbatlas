@@ -31,12 +31,11 @@ func (b *Backend) clientMongo(ctx context.Context, s logical.Storage) (*mongodba
 func nonCachedClient(ctx context.Context, s logical.Storage) (*mongodbatlas.Client, error) {
 
 	config, err := getRootConfig(ctx, s)
-
-	transport := digest.NewTransport(config.PublicKey, config.PrivateKey)
-
 	if err != nil {
 		return nil, err
 	}
+
+	transport := digest.NewTransport(config.PublicKey, config.PrivateKey)
 
 	client, err := transport.Client()
 	if err != nil {

@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/Sectorbob/mlab-ns2 v0.0.0-20171030222938-d3aa0c295a8a
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/go-test/deep v1.0.2 // indirect
+	github.com/go-test/deep v1.0.2
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-hclog v0.9.2
 	github.com/hashicorp/go-version v1.2.0 // indirect
