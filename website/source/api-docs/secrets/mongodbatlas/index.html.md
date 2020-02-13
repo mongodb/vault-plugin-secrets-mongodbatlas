@@ -47,17 +47,18 @@ $ curl \
     http://127.0.0.1:8200/mongodbatlas/config`
 ```
 
-## Programmatic API Keys
+## Create/Update Programmatic API Key role
 Programmatic API Key credential types create a Vault role to generate a Programmatic API Key at
-either the MongoDB Atlas Organization or Project level with the designated role(s) for programmatic access.
+either the MongoDB Atlas Organization or Project level with the designated role(s) for programmatic access. If a role with the name does not exist, it will be created. If the role exists, it will be updated with the new attributes.
 
 | Method   | Path                         |
 | :--------------------------- | :--------------------- |
-| `POST`   | `/roles/{name}`     |
+| `POST`   | `/roles/:name`     |
 
 
 ## Parameters
 
+`name` `(string <required>)` - Unique identifier name of the role name
 `project_id` `(string <required>)` - Unique identifier for the organization to which the target API Key belongs. Use the /orgs endpoint to retrieve all organizations to which the authenticated user has access.
 `roles` `(list [string] <required>)` - List of roles that the API Key needs to have. If the roles array is provided
 `ip_addresses` `(list [string] <Optional>)` - IP address to be added to the whitelist for the API key. This field is mutually exclusive with the cidrBlock field.
@@ -70,7 +71,7 @@ either the MongoDB Atlas Organization or Project level with the designated role(
   "project_id": "5cf5a45a9ccf6400e60981b6",
   "roles": ["GROUP_CLUSTER_MANAGER"],
   "cidr_blocks": ["192.168.1.3/32"],
-  "ip_addresses": ["192.168.1.3", "192.168.1.3"]
+  "ip_addresses": ["192.168.1.3", "192.168.1.4"]
 }
 ```
 
@@ -101,7 +102,10 @@ $ curl \
 
 | Method   | Path                         |
 | :--------------------------- | :--------------------- |
-| `GET`   | `/creds/{name}`     |
+| `GET`   | `/creds/:name`     |
+
+## Parameters
+`name` `(string <required>)` - Unique identifier name of the credential
 
 ```bash
 $ curl \
