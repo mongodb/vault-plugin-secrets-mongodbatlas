@@ -89,11 +89,114 @@ $ curl \
   "project_id": "5cf5a45a9ccf6400e60981b6",
   "roles": ["GROUP_CLUSTER_MANAGER"],
   "cidr_blocks": ["192.168.1.3/32"],
-  "ip_addresses": ["192.168.1.3", "192.168.1.3"],
+  "ip_addresses": ["192.168.1.3", "192.168.1.4"],
   "organization_id": "7cf5a45a9ccf6400e60981b7",
   "ttl": "0s",
   "max_ttl": "0s"
 }
+
+```
+
+## Read Programmatic API Key role
+
+| Method   | Path                         |
+| :--------------------------- | :--------------------- |
+| `Get`   | `/roles/:name`     |
+
+
+## Parameters
+
+`name` `(string <required>)` - Unique identifier name of the role name
+
+### Sample Payload
+
+```bash
+$ curl \
+    --header "X-Vault-Token: ..." \
+    --request GET \
+    --data @payload.json \
+    http://127.0.0.1:8200/mongodbatlas/roles/test-programmatic-key
+```
+
+### Sample Response
+```json
+{
+  "project_id": "5cf5a45a9ccf6400e60981b6",
+  "roles": ["GROUP_CLUSTER_MANAGER"],
+  "cidr_blocks": ["192.168.1.3/32"],
+  "ip_addresses": ["192.168.1.3", "192.168.1.4"],
+  "organization_id": "7cf5a45a9ccf6400e60981b7",
+  "ttl": "0s",
+  "max_ttl": "0s"
+}
+```
+
+## List Programmatic API Key role
+
+| Method   | Path                         |
+| :--------------------------- | :--------------------- |
+| `Get`   | `/roles`     |
+
+
+### Sample Payload
+
+```bash
+$ curl \
+    --header "X-Vault-Token: ..." \
+    --request GET \
+    --data @payload.json \
+    http://127.0.0.1:8200/mongodbatlas/roles
+```
+
+### Sample Response
+```json
+[
+  {
+    "project_id": "5cf5a45a9ccf6400e60981b6",
+    "roles": ["GROUP_CLUSTER_MANAGER"],
+    "cidr_blocks": ["192.168.1.3/32"],
+    "ip_addresses": ["192.168.1.3", "192.168.1.4"],
+    "organization_id": "7cf5a45a9ccf6400e60981b7",
+    "ttl": "0s",
+    "max_ttl": "0s"
+  },
+  {
+    "project_id": "5cf5a45a9ccf6400e60981b6",
+    "roles": ["READ"],
+    "cidr_blocks": ["192.168.1.3/35"],
+    "ip_addresses": ["192.168.1.5", "192.168.1.6"],
+    "organization_id": "7cf5a45a9ccf6400e60981b7",
+    "ttl": "0s",
+    "max_ttl": "0s"
+  }
+]
+
+```
+
+## Delete Programmatic API Key role
+
+| Method   | Path                         |
+| :--------------------------- | :--------------------- |
+| `DELETE`   | `/roles/:name`     |
+
+
+## Parameters
+
+`name` `(string <required>)` - Unique identifier name of the role name
+
+### Sample Payload
+
+```bash
+$ curl \
+    --header "X-Vault-Token: ..." \
+    --request DELETE \
+    --data @payload.json \
+    http://127.0.0.1:8200/mongodbatlas/roles/test-programmatic-key
+```
+
+### Sample Response
+```json
+{}
 ```
 
 ## Read Credential
