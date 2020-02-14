@@ -60,7 +60,29 @@ either the MongoDB Atlas Organization or Project level with the designated role(
 
 `name` `(string <required>)` - Unique identifier name of the role name
 `project_id` `(string <required>)` - Unique identifier for the organization to which the target API Key belongs. Use the /orgs endpoint to retrieve all organizations to which the authenticated user has access.
-`roles` `(list [string] <required>)` - List of roles that the API Key needs to have. If the roles array is provided
+`roles` `(list [string] <required>)` - List of roles that the API Key needs to have. If the roles array is provided:
+
+  -> **IMPORTANT:** Provide at least one role. Make sure all roles must be valid for the Organization or Project.
+
+  -> **NOTE:** Include all roles that you want this API Key to have. Any roles not in this array are removed.
+
+  - The Organization roles are:
+    - `ORG_OWNER`
+    - `ORG_MEMBER`
+    - `ORG_GROUP_CREATOR`
+    - `ORG_BILLING_ADMIN`
+    - `ORG_READ_ONLY`
+
+  - The Project roles are:
+    - `GROUP_CHARTS_ADMIN`
+    - `GROUP_CLUSTER_MANAGER`
+    - `GROUP_DATA_ACCESS_ADMIN`
+    - `GROUP_DATA_ACCESS_READ_ONLY`
+    - `GROUP_DATA_ACCESS_READ_WRITE`
+    - `GROUP_OWNER`
+    - `GROUP_READ_ONLY`
+
+
 `ip_addresses` `(list [string] <Optional>)` - IP address to be added to the whitelist for the API key. This field is mutually exclusive with the cidrBlock field.
 `cidr_blocks` `(list [string] <Optional>)` - Whitelist entry in CIDR notation to be added for the API key. This field is mutually exclusive with the ipAddress field.
 
