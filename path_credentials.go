@@ -53,9 +53,9 @@ func (b *Backend) pathCredentialsRead(ctx context.Context, req *logical.Request,
 
 type walEntry struct {
 	UserName             string
-	ProjectID            string
-	OrganizationID       string
-	ProgrammaticAPIKeyID string
+	ProjectID            string `mapstructure:"project_id"`
+	OrganizationID       string `mapstructure:"organization_id"`
+	ProgrammaticAPIKeyID string `mapstructure:"programmatic_api_key_id"`
 }
 
 func genUsername(displayName string) (string, error) {

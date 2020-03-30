@@ -215,7 +215,6 @@ func (b *Backend) programmaticAPIKeyRevoke(ctx context.Context, req *logical.Req
 }
 
 func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logical.Request, _kind string, data interface{}) error {
-
 	var entry walEntry
 	if err := mapstructure.Decode(data, &entry); err != nil {
 		return err
@@ -227,8 +226,7 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 		return nil
 	}
 
-	switch {
-	case isOrgKey(entry.OrganizationID, entry.ProjectID):
+	if isOrgKey(entry.OrganizationID, entry.ProjectID) || isAssignedToProject(entry.OrganizationID, entry.ProjectID) {
 		// check if the user exists or not
 		_, res, err := client.APIKeys.Get(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
 		// if the user is gone, move along
@@ -247,7 +245,9 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 			}
 			return err
 		}
-	case isProjectKey(entry.OrganizationID, entry.ProjectID):
+	}
+
+	if isProjectKey(entry.OrganizationID, entry.ProjectID) {
 		// now, delete the user
 		res, err := client.ProjectAPIKeys.Unassign(ctx, entry.ProjectID, entry.ProgrammaticAPIKeyID)
 		if err != nil {
@@ -256,29 +256,9 @@ func (b *Backend) pathProgrammaticAPIKeyRollback(ctx context.Context, req *logic
 			}
 			return err
 		}
-	case isAssignedToProject(entry.OrganizationID, entry.ProjectID):
-		// check if the user exists or not
-		_, res, err := client.APIKeys.Get(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
-		// if the user is gone, move along
-		if err != nil {
-			if res != nil && res.StatusCode == http.StatusNotFound {
-				return nil
-			}
-			return err
-		}
-
-		// now, delete the api key
-		res, err = client.APIKeys.Delete(ctx, entry.OrganizationID, entry.ProgrammaticAPIKeyID)
-		if err != nil {
-			if res != nil && res.StatusCode == http.StatusNotFound {
-				return nil
-			}
-			return err
-		}
-
 	}
 
-	return nil
+	return fmt.Errorf("Programmatic API key %s type not found, not deleting", entry.ProgrammaticAPIKeyID)
 }
 
 func (b *Backend) programmaticAPIKeysRenew(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
